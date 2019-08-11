@@ -1,0 +1,17 @@
+[
+  {
+    "ext": {
+      "ack": true
+    },
+    "minimumVersion": "1.0",
+    "clientId": "13bp016pv6vdsqxz8p",
+    "supportedConnectionTypes": [
+      "long-polling",
+      "smartrest-long-polling",
+      "websocket"
+    ],
+    "channel": "/meta/handshake",
+    "version": "1.0",
+    "successful": true
+  }
+]

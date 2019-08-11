@@ -1,0 +1,11 @@
+[
+  {
+    "advice": {
+      "interval": 0,
+      "reconnect": "handshake"
+    },
+    "channel": "/meta/connect",
+    "error": "402::Unknown client",
+    "successful": false
+  }
+]

@@ -1,0 +1,231 @@
+{
+  "additionParents": {
+    "self": "http://tenant.cumulocity.com/inventory/managedObjects/1234/additionParents",
+    "references": []
+  },
+  "owner": "device_io-key-123456789012345",
+  "sensors": {
+    "self": "http://tenant.cumulocity.com/inventory/managedObjects/1234/sensors",
+    "references": []
+  },
+  "childAssets": {
+    "self": "http://tenant.cumulocity.com/inventory/managedObjects/1234/childAssets",
+    "references": []
+  },
+  "creationTime": "2019-05-25T19:40:31.888Z",
+  "type": "c8y_IoLinkSensor",
+  "lastUpdated": "2019-06-28T09:04:48.198Z",
+  "childAdditions": {
+    "self": "http://tenant.cumulocity.com/inventory/managedObjects/1234/childAdditions",
+    "references": [
+      {
+        "managedObject": {
+          "self": "http://tenant.cumulocity.com/inventory/managedObjects/116",
+          "id": "116"
+        },
+        "self": "http://tenant.cumulocity.com/inventory/managedObjects/1234/childAdditions/116"
+      },
+      {
+        "managedObject": {
+          "self": "http://tenant.cumulocity.com/inventory/managedObjects/309",
+          "id": "309"
+        },
+        "self": "http://tenant.cumulocity.com/inventory/managedObjects/1234/childAdditions/309"
+      },
+      {
+        "managedObject": {
+          "name": "Alarm bei Erreichen eines expliziten Schwellwerts erzeugen",
+          "self": "http://tenant.cumulocity.com/inventory/managedObjects/21888",
+          "id": "21888"
+        },
+        "self": "http://tenant.cumulocity.com/inventory/managedObjects/1234/childAdditions/21888"
+      },
+      {
+        "managedObject": {
+          "name": "Bei Alarm wird SMS gesendet.",
+          "self": "http://tenant.cumulocity.com/inventory/managedObjects/293606",
+          "id": "293606"
+        },
+        "self": "http://tenant.cumulocity.com/inventory/managedObjects/1234/childAdditions/293606"
+      }
+    ]
+  },
+  "name": "AU004",
+  "assetParents": {
+    "self": "http://tenant.cumulocity.com/inventory/managedObjects/1234/assetParents",
+    "references": []
+  },
+  "deviceParents": {
+    "self": "http://tenant.cumulocity.com/inventory/managedObjects/1234/deviceParents",
+    "references": []
+  },
+  "self": "http://tenant.cumulocity.com/inventory/managedObjects/1234",
+  "id": "1234",
+  "c8y_Availability": {
+    "lastMessage": "2019-07-25T14:14:07.266Z",
+    "status": "AVAILABLE"
+  },
+  "iolink_info": {
+    "ioKey": "io-key4",
+    "sensorName": "AU004",
+    "vendorId": "837",
+    "slot": 1,
+    "vendorName": "",
+    "deviceId": "39"
+  },
+  "ioKey": {
+    "additionParents": {
+      "references": [],
+      "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/additionParents"
+    },
+    "owner": "device_io-key-123456789012345",
+    "c8y_Firmware": {
+      "name": "IOKey",
+      "version": "V1.1.5"
+    },
+    "sensors": {
+      "references": [
+        {
+          "managedObject": {
+            "name": "AU004",
+            "self": "https://tenant.cumulocity.com/inventory/managedObjects/1234",
+            "id": "1234"
+          },
+          "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/sensors/1234"
+        }
+      ],
+      "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/sensors"
+    },
+    "c8y_Availability": {
+      "lastMessage": "2019-05-25T19:13:57.242Z",
+      "status": "UNAVAILABLE"
+    },
+    "com_cumulocity_model_Agent": {},
+    "childAssets": {
+      "references": [],
+      "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/childAssets"
+    },
+    "c8y_Connection": {
+      "status": "DISCONNECTED"
+    },
+    "c8y_RequiredAvailability": {
+      "responseInterval": 3
+    },
+    "creationTime": "2019-05-25T19:13:53.984Z",
+    "c8y_SupportedOperations": [
+      "c8y_Restart",
+      "c8y_Configuration",
+      "c8y_Firmware"
+    ],
+    "type": "io-key4",
+    "lastUpdated": "2019-05-25T19:38:10.532Z",
+    "c8y_IsIokey": {},
+    "c8y_ActiveAlarmsStatus": {
+      "major": 1
+    },
+    "c8y_IsDevice": {},
+    "childAdditions": {
+      "references": [
+        {
+          "managedObject": {
+            "self": "https://tenant.cumulocity.com/inventory/managedObjects/306",
+            "id": "306"
+          },
+          "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/childAdditions/306"
+        }
+      ],
+      "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/childAdditions"
+    },
+    "name": "123456789012345-io-key",
+    "assetParents": {
+      "references": [],
+      "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/assetParents"
+    },
+    "deviceParents": {
+      "references": [],
+      "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/deviceParents"
+    },
+    "self": "https://tenant.cumulocity.com/inventory/managedObjects/109",
+    "id": "109",
+    "status": {
+      "maintenanceStatus": false,
+      "pushStatus": {
+        "icon": "long-arrow-left",
+        "tooltip": "Connection to device not established (not supported by device or no connectivity)",
+        "label": "Push connection: inactive",
+        "class": "statusUnknown",
+        "status": "DISCONNECTED"
+      },
+      "sendStatus": {
+        "icon": "long-arrow-right",
+        "tooltip": "Letzte Anfrage vom Ger\u00e4t:\n25. Mai 2019 21:13",
+        "label": "Send connection: offline",
+        "class": "statusNok",
+        "status": "UNAVAILABLE"
+      }
+    }
+  },
+  "c8y_Connection": {
+    "status": "DISCONNECTED"
+  },
+  "c8y_RequiredAvailability": {
+    "responseInterval": 3
+  },
+  "c8y_WidgetRuntimeConfig!quickBasicSmartRules!123456789012345-AU004-1-1_Series-837-39": {
+    "smartRuleIdsByTemplateNames": {
+      "onAlarmSendEmail": "1755",
+      "explicitThresholdSmartRule": "21888",
+      "onAlarmSendSms": "293606"
+    }
+  },
+  "c8y_ActiveAlarmsStatus": {
+    "critical": 1,
+    "major": 0
+  },
+  "iolink_Measurement4": {
+    "fragment": "123456789012345-AU004-1-4",
+    "unit": null,
+    "min": null,
+    "max": null,
+    "series": "Series-837-39"
+  },
+  "iolink_Measurement3": {
+    "fragment": "123456789012345-AU004-1-3",
+    "unit": null,
+    "min": null,
+    "max": null,
+    "series": "Series-837-39"
+  },
+  "iolink_Measurement2": {
+    "fragment": "123456789012345-AU004-1-2",
+    "unit": null,
+    "min": null,
+    "max": null,
+    "series": "Series-837-39"
+  },
+  "iolink_Measurement1": {
+    "fragment": "123456789012345-AU004-1-1",
+    "unit": "mm",
+    "min": "40",
+    "max": "450",
+    "series": "Series-837-39"
+  },
+  "c8y_IsIolink": {},
+  "status": {
+    "maintenanceStatus": false,
+    "pushStatus": {
+      "icon": "long-arrow-left",
+      "tooltip": "Connection to device not established (not supported by device or no connectivity)",
+      "label": "Push connection: inactive",
+      "class": "statusUnknown",
+      "status": "DISCONNECTED"
+    },
+    "sendStatus": {
+      "icon": "long-arrow-right",
+      "tooltip": "Letzte Anfrage vom Ger\u00e4t:\n25. Mai 2019 22:17",
+      "label": "Send connection: online",
+      "class": "statusOk",
+      "status": "AVAILABLE"
+    }
+  }
+}

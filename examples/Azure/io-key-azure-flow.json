@@ -1,0 +1,47 @@
+[
+  {
+    "id": "cf0985f9.a4cf68",
+    "type": "tab",
+    "label": "Flow 3",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "48ca0ad7.46ead4",
+    "type": "mqtt out",
+    "z": "cf0985f9.a4cf68",
+    "name": "",
+    "topic": "",
+    "qos": "1",
+    "retain": "false",
+    "broker": "",
+    "x": 500.00001525878906,
+    "y": 351.0000104904175,
+    "wires": []
+  },
+  {
+    "id": "74973997.753bb8",
+    "type": "measurements",
+    "z": "cf0985f9.a4cf68",
+    "name": "",
+    "auth": "",
+    "device": "device_io-key-357142090031740",
+    "sensor": "869876",
+    "channel": "357142090031740-AU004-1-1",
+    "format": "none",
+    "datapoint": "",
+    "x": 290.00001525878906,
+    "y": 351.0000104904175,
+    "wires": [["48ca0ad7.46ead4"]]
+  },
+  {
+    "id": "f7d01b48.8698d8",
+    "type": "comment",
+    "z": "cf0985f9.a4cf68",
+    "name": "Flow Description",
+    "info": "This flow establishes a connection to the \nAzure cloud via MQTT.",
+    "x": 294.1666717529297,
+    "y": 240.66669273376465,
+    "wires": []
+  }
+]

@@ -1,0 +1,95 @@
+<script type="text/javascript">
+  RED.nodes.registerType('measurements', {
+    category: 'io-key',
+    color: '#a6bbcf',
+    defaults: {
+      name: { value: '' },
+      auth: {
+        value: { tenant: '', username: '', password: '' },
+        type: 'tenant-config'
+      },
+      device: { value: '' },
+      sensor: { value: '' },
+      channel: { value: '' },
+      format: { value: 'none' },
+      datapoint: { value: '' }
+    },
+    color: '#73bb1e',
+    inputs: 0,
+    outputs: 1,
+    icon: 'io.png',
+    label: function() {
+      return this.name || 'measurements';
+    },
+    oneditprepare: function() {
+      var node = this;
+
+      $.getScript('/js/common').done(function(data, textStatus, jqxhr) {
+        initUI(node);
+      });
+    },
+    oneditsave: function() {
+      /**
+       * Saves all selected values
+       */
+      var node = this;
+
+      var device = $('#node-input-iokey option:selected').val();
+      var sensor = $('#node-input-sensor option:selected').val();
+      var channel = $('#node-input-channel option:selected').val();
+      var datapoint = $('#node-input-datapoint').val();
+
+      this.device = device;
+      this.sensor = sensor;
+      this.channel = channel;
+      this.datapoint = datapoint;
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="measurements">
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+  <div class="form-row">
+    <label for="node-input-auth"> Authentication</label>
+    <input id="node-input-auth" style="width:70%;">
+  </div>
+  <div class="form-row">
+    <label for="node-input-iokey"> io-key</label>
+    <select id="node-input-iokey" style="width:70%;">
+      <option value="">No io-keys found<option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-sensor"> Sensor</label>
+    <select id="node-input-sensor" style="width:70%;">
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-channel"> Channel</label>
+    <select id="node-input-channel" style="width:70%;">
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-format"> Output Format</label>
+    <select id="node-input-format" style="width:70%;">
+        <option value="none">Default</option>
+        <option value="mdsp">MindSphere</option>
+        <option value="c8y">Cumulocity</option>
+        <option value="ppmp">PPMP</option>
+    </select>
+  </div>
+  <div class="form-row" id="div-datapointId" style="display:none;" autocomplete="off">
+    <label for="node-input-datapoint"> Datapoint ID</label>
+    <input type="text" id="node-input-datapoint" placeholder="1234" autocomplete="false" name="hidden">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="measurements">
+  <p>A node to receive real-time notifications from events</p>
+
+  <p>Add your tenant-config and enter your hostname, username and password</p>
+  <p>Then you need to deploy the flow so that the nodes can fetch the list of io-keys</p>
+</script>

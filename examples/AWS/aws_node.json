@@ -1,0 +1,47 @@
+[
+  {
+    "id": "85547a1.b984788",
+    "type": "tab",
+    "label": "Flow 1",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "cb2d26c8.7703d8",
+    "type": "measurements",
+    "z": "85547a1.b984788",
+    "name": "",
+    "auth": "",
+    "device": "device_io-key-357142090032045",
+    "sensor": "887565",
+    "channel": "357142090032045-AL002-1-1",
+    "format": "none",
+    "datapoint": "",
+    "x": 301.0174026489258,
+    "y": 300.0103988647461,
+    "wires": [["e9449efb.24ad7"]]
+  },
+  {
+    "id": "cf25cafd.54f178",
+    "type": "comment",
+    "z": "85547a1.b984788",
+    "name": "Flow Description",
+    "info": "With this flow sensor data can be directly published\nvia MQTT.",
+    "x": 302.0173645019531,
+    "y": 204.01043033599854,
+    "wires": []
+  },
+  {
+    "id": "e9449efb.24ad7",
+    "type": "mqtt out",
+    "z": "85547a1.b984788",
+    "name": "",
+    "topic": "",
+    "qos": "",
+    "retain": "",
+    "broker": "",
+    "x": 610.0693817138672,
+    "y": 299.4965190887451,
+    "wires": []
+  }
+]

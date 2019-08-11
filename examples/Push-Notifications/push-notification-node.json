@@ -1,0 +1,180 @@
+[
+  {
+    "id": "cb8a1fee.fc79e",
+    "type": "tab",
+    "label": "Temperature Measurement with Push-Notifications",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "ff80110a.bbf1b",
+    "type": "measurements",
+    "z": "cb8a1fee.fc79e",
+    "name": "",
+    "auth": "",
+    "device": "device_io-key-357142090032045",
+    "sensor": "887565",
+    "channel": "357142090032045-AL002-1-1",
+    "format": "none",
+    "datapoint": "",
+    "x": 121,
+    "y": 417.69099617004395,
+    "wires": [
+      [
+        "6474c00d.0a9b",
+        "56020173.dcd22",
+        "b1dd7ed5.910ab",
+        "75f8c985.47c648",
+        "1922e31e.0feddd",
+        "8befdcb8.87eba"
+      ]
+    ]
+  },
+  {
+    "id": "e9acaa50.e2a9f8",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "Controll condition and hysteresis",
+    "func": "const hysteresisMet = flow.get('hysteresisMet25')||false;\n\nlet data = {}\ndata.payload=`Slight overtemperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet25', false);\n    return data\n}\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 861.5207366943359,
+    "y": 266.9237251281738,
+    "wires": [["ae84aeec.757c"]]
+  },
+  {
+    "id": "8befdcb8.87eba",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": ">=25",
+    "func": "\n\n\n\n\nif(msg.payload.value>=25 && msg.payload.value<35){\n    msg.payload.condition=true\n   \n}else{\n    msg.payload.condition=false\n}\nreturn msg ",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 566.0171966552734,
+    "y": 266.0104503631592,
+    "wires": [["e9acaa50.e2a9f8"]],
+    "inputLabels": ["Actual Value"],
+    "icon": "node-red-dashboard/ui_numeric.png"
+  },
+  {
+    "id": "6474c00d.0a9b",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": ">=35",
+    "func": "if(msg.payload.value>=35 && msg.payload.value<45){\n    msg.payload.condition=true\n   \n}else{\n    msg.payload.condition=false\n}\nreturn msg ",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 565.0173225402832,
+    "y": 428.0103931427002,
+    "wires": [["bb4a0aff.247518"]],
+    "inputLabels": ["Actual Value"],
+    "icon": "node-red-dashboard/ui_numeric.png"
+  },
+  {
+    "id": "56020173.dcd22",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": ">=45",
+    "func": "if(msg.payload.value>45){\n    msg.payload.condition=true\n   \n}else{\n    msg.payload.condition=false\n}\nreturn msg ",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 559.0173263549805,
+    "y": 588.0104846954346,
+    "wires": [["1b61c824.d21108"]],
+    "inputLabels": ["Actual Value"],
+    "icon": "node-red-dashboard/ui_numeric.png"
+  },
+  {
+    "id": "c1b421e7.c43f4",
+    "type": "comment",
+    "z": "cb8a1fee.fc79e",
+    "name": "Flow Description",
+    "info": "This flow is used to check whether temperature\nthresholds have been exceeded. If this is the \ncase, a push notification is sent to the configured\nsmartphone. (A limit of one notification per minute has been set)",
+    "x": 131.52429962158203,
+    "y": 149.92015838623047,
+    "wires": []
+  },
+  {
+    "id": "1922e31e.0feddd",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "Hysteresis 10 %",
+    "func": "\n\nconst value = msg.payload.value\nconst HYSTERESIS = 10 // %\nconst THRESHOLD = 25 // °C\n\n\n\nif(value < THRESHOLD * (1- HYSTERESIS/100) ){\n    flow.set('hysteresisMet25', true);\n}",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 537.9062347412109,
+    "y": 210.34382438659668,
+    "wires": [[]]
+  },
+  {
+    "id": "75f8c985.47c648",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "Hysteresis 10 %",
+    "func": "\n\nconst value = msg.payload.value\nconst HYSTERESIS = 10 // %\nconst THRESHOLD = 35 // °C\n\n\n\n\nif(value < THRESHOLD * (1- HYSTERESIS/100) ){\n    flow.set('hysteresisMet35', true);\n}",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 534.0173645019531,
+    "y": 382.0104064941406,
+    "wires": [[]]
+  },
+  {
+    "id": "b1dd7ed5.910ab",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "Hysteresis 10 %",
+    "func": "\n\nconst value = msg.payload.value\nconst HYSTERESIS = 10 // %\nconst THRESHOLD = 45 // °C\n\n\n\n\nif(value < THRESHOLD * (1- HYSTERESIS/100) ){\n    flow.set('hysteresisMet45', true);\n}",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 534.0173721313477,
+    "y": 541.0103950500488,
+    "wires": [[]]
+  },
+  {
+    "id": "bb4a0aff.247518",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "Controll condition and hysteresis",
+    "func": "const hysteresisMet = flow.get('hysteresisMet35')||false;\n\nlet data = {}\ndata.payload=`Slight overtemperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet35', false);\n    return data\n}\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 863.017333984375,
+    "y": 426.0104064941406,
+    "wires": [["ae84aeec.757c"]]
+  },
+  {
+    "id": "1b61c824.d21108",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "Controll condition and hysteresis",
+    "func": "const hysteresisMet = flow.get('hysteresisMet45')||false;\n\nlet data = {}\ndata.payload=`Slight overtemperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet45', false);\n    return data\n}\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 861.017333984375,
+    "y": 591.0104370117188,
+    "wires": [["ae84aeec.757c"]]
+  },
+  {
+    "id": "ae84aeec.757c",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "LimitPerMinute = 1",
+    "func": "\nlet lastSend = context.get('lastSend')||0;\nlet currentTimestamp = new Date().getTime();\n\n//  Calculate difference between last and latest notification\nlet diffMilli = Math.abs(currentTimestamp - lastSend)\n\n// Convert milliseconds into minutes\nlet diffMin = diffMilli/(1000*60)\n  \n  \nif(diffMin > 1){\n    context.set('lastSend', currentTimestamp);\n    return msg;\n}",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 1261.0695266723633,
+    "y": 435.2292881011963,
+    "wires": [["3de6ef84.6cd47"]]
+  },
+  {
+    "id": "3de6ef84.6cd47",
+    "type": "pushover api",
+    "z": "cb8a1fee.fc79e",
+    "keys": "",
+    "title": "",
+    "name": "",
+    "x": 1548.1667098999023,
+    "y": 432.6666793823242,
+    "wires": []
+  }
+]

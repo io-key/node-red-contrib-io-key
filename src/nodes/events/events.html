@@ -1,0 +1,85 @@
+<script type="text/javascript">
+  RED.nodes.registerType('events', {
+    category: 'io-key',
+    color: '#a6bbcf',
+    defaults: {
+      name: { value: '' },
+      auth: {
+        value: { tenant: '', username: '', password: '' },
+        type: 'tenant-config'
+      },
+      device: { value: '' },
+      sensor: { value: '' },
+      channel: { value: '' },
+      format: { value: 'none' }
+    },
+    color: '#73bb1e',
+    inputs: 0,
+    outputs: 1,
+    icon: 'io.png',
+    label: function() {
+      return this.name || 'events';
+    },
+    oneditprepare: function() {
+      var node = this;
+
+      $.getScript('/js/common').done(function(data, textStatus, jqxhr) {
+        initUI(node);
+      });
+    },
+    oneditsave: function() {
+      /**
+       * Saves all selected values
+       */
+      var node = this;
+
+      var device = $('#node-input-iokey option:selected').val();
+      var sensor = $('#node-input-sensor option:selected').val();
+      var channel = $('#node-input-channel option:selected').val();
+
+      this.device = device;
+      this.sensor = sensor;
+      this.channel = channel;
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="events">
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+  <div class="form-row">
+    <label for="node-input-auth"> Authentication</label>
+    <input id="node-input-auth" style="width:70%;">
+  </div>
+  <div class="form-row">
+    <label for="node-input-iokey"> io-key</label>
+    <select id="node-input-iokey" style="width:70%;">
+      <option value="">No io-keys found<option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-sensor"> Sensor</label>
+    <select id="node-input-sensor" style="width:70%;">
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-channel"> Channel</label>
+    <select id="node-input-channel" style="width:70%;">
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-format"> Output Format</label>
+    <select id="node-input-format" style="width:70%;">
+        <option value="none">Default</option>
+        <option value="mdsp">MindSphere</option>
+        <option value="c8y">Cumulocity</option>
+        <option value="ppmp">PPMP</option>
+    </select>
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="events">
+  <p>A node to receive real-time notifications from events</p>
+</script>

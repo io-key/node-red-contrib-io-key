@@ -1,0 +1,88 @@
+[
+  {
+    "id": "8f390e05.0dcbf",
+    "type": "tab",
+    "label": "Flow 1",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "3e5ec454.5ac53c",
+    "type": "alexa-local",
+    "z": "8f390e05.0dcbf",
+    "devicename": "IO Key Data Transfer",
+    "inputtrigger": true,
+    "x": 249.07652282714844,
+    "y": 346.61108112335205,
+    "wires": [["a301cad5.02aee8"]]
+  },
+  {
+    "id": "45c49674.b81d28",
+    "type": "measurements",
+    "z": "8f390e05.0dcbf",
+    "name": "",
+    "auth": "",
+    "device": "device_io-key-357142090032045",
+    "sensor": "887565",
+    "channel": "357142090032045-AL002-1-1",
+    "format": "mdsp",
+    "datapoint": "1559295264254",
+    "x": 234.07290649414062,
+    "y": 457.30905532836914,
+    "wires": [["dd6804c2.19fff8"]]
+  },
+  {
+    "id": "580901cf.58c0a",
+    "type": "mindconnect",
+    "z": "8f390e05.0dcbf",
+    "name": "",
+    "configtype": "SHARED_SECRET",
+    "agentconfig": "",
+    "privatekey": "",
+    "model": "",
+    "validate": true,
+    "validateevent": true,
+    "chunk": false,
+    "disablekeepalive": false,
+    "retry": 3,
+    "parallel": 1,
+    "x": 816.0797348022461,
+    "y": 453.76736068725586,
+    "wires": [[]]
+  },
+  {
+    "id": "a301cad5.02aee8",
+    "type": "function",
+    "z": "8f390e05.0dcbf",
+    "name": "Data Transfer",
+    "func": "if(msg.on === true||msg.payload.on === true){\n    flow.set('dataTransfer', true);\n  \n}else{\n    flow.set('dataTransfer', false);\n    \n}\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 524.069522857666,
+    "y": 346.7604446411133,
+    "wires": [[]],
+    "icon": "node-red-contrib-alexa-local/alexa-local.png"
+  },
+  {
+    "id": "dd6804c2.19fff8",
+    "type": "function",
+    "z": "8f390e05.0dcbf",
+    "name": "Controll",
+    "func": "let dataTransfer = flow.get('dataTransfer')||false;\n\nif(dataTransfer === true){\n    return msg\n}\n\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 504.0173149108887,
+    "y": 456.0103750228882,
+    "wires": [["580901cf.58c0a"]]
+  },
+  {
+    "id": "84402137.8d624",
+    "type": "comment",
+    "z": "8f390e05.0dcbf",
+    "name": "Flow Description",
+    "info": "With this flow you can activate or deactivate\nthe data transfer to a cloud platform (here \nmindsphere) via alexa spoken command.",
+    "x": 230.01734924316406,
+    "y": 239.0104465484619,
+    "wires": []
+  }
+]

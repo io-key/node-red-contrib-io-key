@@ -1,0 +1,54 @@
+{
+  "name": "node-red-contrib-io-key",
+  "version": "1.0.0",
+  "description": "A collection of nodes to access the io-key cloud with Node-RED.",
+  "scripts": {
+    "test": "jest --forceExit --detectOpenHandles",
+    "coverage": "jest --coverage --forceExit --detectOpenHandles"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/PatersonKopp/node-red-contrib-io-key.git"
+  },
+  "author": "io-key",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/PatersonKopp/node-red-contrib-io-key/issues"
+  },
+  "homepage": "https://gitlab.com/PatersonKopp/node-red-contrib-io-key#readme",
+  "keywords": [
+    "node-red",
+    "io-key"
+  ],
+  "node-red": {
+    "nodes": {
+      "tenant-config": "src/nodes/tenant-config/tenant-config.js",
+      "measurements": "src/nodes/measurements/measurements.js",
+      "alarms": "src/nodes/alarms/alarms.js",
+      "events": "src/nodes/events/events.js"
+    }
+  },
+  "devDependencies": {
+    "axios-mock-adapter": "^1.17.0",
+    "jest": "^24.8.0",
+    "jest-cli": "^24.8.0",
+    "node-red": "^0.20.7",
+    "node-red-node-test-helper": "^0.2.3",
+    "should": "^13.2.3"
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "fs": "0.0.1-security",
+    "https": "^1.0.0",
+    "path": "^0.12.7"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "<rootDir>/src/**/*.js"
+    ],
+    "testMatch": [
+      "<rootDir>/src/**/test/**/*_spec.js"
+    ],
+    "testEnvironment": "node"
+  }
+}

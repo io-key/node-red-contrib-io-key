@@ -1,0 +1,40 @@
+<script type="text/javascript">
+  RED.nodes.registerType('tenant-config', {
+    category: 'config',
+    defaults: {
+      name: { value: '', required: true }
+    },
+    credentials: {
+      tenant: { type: 'text', required: true },
+      username: { type: 'text', required: true },
+      password: { type: 'password', required: true }
+    },
+    label: function() {
+      return this.name;
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="tenant-config">
+  <div class="form-row">
+      <label for="node-config-input-name"><i class="icon-bookmark"></i> Name</label>
+      <input type="text" id="node-config-input-name" placeholder="My credentials">
+  </div>
+  <div class="form-row">
+      <label for="node-config-input-tenant"><i class="icon-bookmark"></i> Hostname</label>
+      <input type="text" id="node-config-input-tenant" placeholder="example.hostname.com" pattern="[a-zA-Z0-9]+[.]+[a-zA-Z0-9]+[.]+[a-zA-Z0-9]+">
+  </div>
+  <div class="form-row">
+      <label for="node-config-input-username"><i class="icon-bookmark"></i> Username</label>
+      <input type="text" id="node-config-input-username" placeholder="user@example.com">
+  </div>
+  <div class="form-row">
+      <label for="node-config-input-password"><i class="icon-bookmark"></i> Password</label>
+      <input type="password" id="node-config-input-password" placeholder="Password">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="tenant-config">
+  <p>Add your tenant-config and enter your hostname, username and password</p>
+  <p>Then you need to deploy the flow so that the nodes can fetch the list of io-keys</p>
+</script>

@@ -1,0 +1,102 @@
+{
+  "next": "https://tenant.cumulocity.com/inventory/managedObjects?fragmentType=c8y_IsDevice&pageSize=5&currentPage=2",
+  "self": "https://tenant.cumulocity.com/inventory/managedObjects?fragmentType=c8y_IsDevice&pageSize=5&currentPage=1",
+  "managedObjects": [
+    {
+      "additionParents": {
+        "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/additionParents",
+        "references": []
+      },
+      "owner": "device_io-key-123456789012345",
+      "childDevices": {
+        "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/childDevices",
+        "references": [
+          {
+            "managedObject": {
+              "name": "AU004",
+              "self": "https://tenant.cumulocity.com/inventory/managedObjects/1234",
+              "id": "1234"
+            },
+            "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/childDevices/1234"
+          }
+        ]
+      },
+      "childAssets": {
+        "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/childAssets",
+        "references": []
+      },
+      "creationTime": "2019-05-25T19:13:53.984Z",
+      "type": "io-key4",
+      "lastUpdated": "2019-07-23T22:41:46.266Z",
+      "childAdditions": {
+        "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/childAdditions",
+        "references": [
+          {
+            "managedObject": {
+              "self": "https://tenant.cumulocity.com/inventory/managedObjects/306",
+              "id": "306"
+            },
+            "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/childAdditions/306"
+          }
+        ]
+      },
+      "name": "123456789012345-io-key",
+      "assetParents": {
+        "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/assetParents",
+        "references": []
+      },
+      "deviceParents": {
+        "self": "https://tenant.cumulocity.com/inventory/managedObjects/109/deviceParents",
+        "references": []
+      },
+      "self": "https://tenant.cumulocity.com/inventory/managedObjects/109",
+      "id": "109",
+      "c8y_Firmware": {
+        "name": "IOKey",
+        "version": "V1.1.5"
+      },
+      "c8y_Availability": {
+        "lastMessage": "2019-05-25T19:13:57.242Z",
+        "status": "UNAVAILABLE"
+      },
+      "com_cumulocity_model_Agent": {},
+      "c8y_IsIokey": {},
+      "c8y_ActiveAlarmsStatus": {
+        "major": 0
+      },
+      "c8y_IsDevice": {},
+      "c8y_Connection": {
+        "status": "CONNECTED"
+      },
+      "c8y_RequiredAvailability": {
+        "responseInterval": 3
+      },
+      "c8y_SupportedOperations": [
+        "c8y_Restart",
+        "c8y_Configuration",
+        "c8y_Firmware"
+      ],
+      "status": {
+        "maintenanceStatus": false,
+        "pushStatus": {
+          "icon": "long-arrow-left",
+          "tooltip": "Connection to device not established (not supported by device or no connectivity)",
+          "label": "Push connection: inactive",
+          "class": "statusUnknown",
+          "status": "DISCONNECTED"
+        },
+        "sendStatus": {
+          "icon": "long-arrow-right",
+          "tooltip": "Letzte Anfrage vom Gerät:\n25. Mai 2019 21:13",
+          "label": "Send connection: offline",
+          "class": "statusNok",
+          "status": "UNAVAILABLE"
+        }
+      }
+    }
+  ],
+  "statistics": {
+    "currentPage": 1,
+    "pageSize": 5
+  }
+}
