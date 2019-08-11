@@ -2,7 +2,7 @@
   {
     "id": "cb8a1fee.fc79e",
     "type": "tab",
-    "label": "Temperature Measurement with Push-Notifications",
+    "label": "Push-Notifications",
     "disabled": false,
     "info": ""
   },
@@ -12,9 +12,9 @@
     "z": "cb8a1fee.fc79e",
     "name": "",
     "auth": "",
-    "device": "device_io-key-357142090032045",
-    "sensor": "887565",
-    "channel": "357142090032045-AL002-1-1",
+    "device": "",
+    "sensor": "",
+    "channel": "",
     "format": "none",
     "datapoint": "",
     "x": 121,
