@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/PatersonKopp/node-red-contrib-io-key.git"
+    "url": "git+https://github.com/io-key/node-red-contrib-io-key"
   },
   "author": "io-key",
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/PatersonKopp/node-red-contrib-io-key/issues"
+    "url": "https://github.com/io-key/node-red-contrib-io-key/issues"
   },
-  "homepage": "https://gitlab.com/PatersonKopp/node-red-contrib-io-key#readme",
+  "homepage": "https://autosen.com/de/io-key",
   "keywords": [
     "node-red",
     "io-key"
