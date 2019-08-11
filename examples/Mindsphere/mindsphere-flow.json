@@ -1,1 +1,43 @@
-[{"id":"822f96f4.010c28","type":"tab","label":"Flow 1","disabled":false,"info":""},{"id":"df82cb8.a3de138","type":"measurements","z":"822f96f4.010c28","name":"Measurements AU004 1","auth":"6472c6cc.c7d478","device":"device_io-key-357142090031740","sensor":"869876","channel":"357142090031740-AU004-1-1","format":"mdsp","datapoint":"1559295264254","x":150,"y":80,"wires":[["64272a0a.671074"]]},{"id":"64272a0a.671074","type":"mindconnect","z":"822f96f4.010c28","name":"","configtype":"SHARED_SECRET","agentconfig":"{  \"content\": {    \"baseUrl\": \"https://southgate.eu1.mindsphere.io\",    \"iat\": \"eyJraWQiOiJrZXktaWQtMSIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJpc3MiOiJTQ0kiLCJzdWIiOiIxNGVjNDZmNTIyMWY0ZGZiYTEyN2M5YTUzNWUyMTBiYiIsImF1ZCI6IkFJQU0iLCJpYXQiOjE1NjUwMDM4NTMsIm5iZiI6MTU2NTAwMzg1MywiZXhwIjoxNTY1NjA4NjUzLCJqdGkiOiI4YjY3ODBkYi05YTRmLTRiODItODgyNS1kYTU0NTM1YjU3YjciLCJzY29wZSI6IklBVCIsInRlbiI6ImNvZGVzdHJ5IiwidGVuX2N0eCI6Im1haW4tdGVuYW50IiwiY2xpZW50X2NyZWRlbnRpYWxzX3Byb2ZpbGUiOlsiU0hBUkVEX1NFQ1JFVCJdLCJzY2hlbWFzIjpbInVybjpzaWVtZW5zOm1pbmRzcGhlcmU6djEiXX0.Ax0OJfP5Rc5li0nUZ055WpMc2WTO_2dmskLuFvaLnMhSTu97HEcUWMnkpePl-0sBLyzTlc7xwVV-TGmkMigFUeNOSz86ftEonP7n8yny-aiiHfuPQYWo4hNaKbixTq6xnVwofY6yBVupwaXooNmu_IMyejSKw2gVim2ev-nYAWA3qvF0IT84zrZOTwRGBGpdVtf9LUk5mrniD5lor0xLWqeS5qCHBPvNYxr8FpKxg2YlRQC6i-G0XgOvfMSMyoYuy2ZgWUEKbSrXtQKADCZXcrcU5N5hSc52BI2_CZOQiq4AVXGJ6FmM9vnBe6cbOFyiIVnQz605wKT_A5_OkOagvw\",    \"clientCredentialProfile\": [      \"SHARED_SECRET\"    ],    \"clientId\": \"14ec46f5221f4dfba127c9a535e210bb\",    \"tenant\": \"codestry\"  },  \"expiration\": \"2019-08-12T11:17:33.000Z\"}","privatekey":"","model":"","validate":true,"validateevent":true,"chunk":false,"disablekeepalive":false,"retry":3,"parallel":1,"x":450,"y":80,"wires":[[]]},{"id":"6472c6cc.c7d478","type":"tenant-config","z":"","name":"pk@codestryke.com"}]
+[
+  {
+    "id": "47ce5615.772208",
+    "type": "tab",
+    "label": "Minsphere",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "3287aa3d.50b3f6",
+    "type": "measurements",
+    "z": "47ce5615.772208",
+    "name": "",
+    "auth": "",
+    "device": "",
+    "sensor": "",
+    "channel": "",
+    "format": "none",
+    "datapoint": "",
+    "x": 120,
+    "y": 60,
+    "wires": [["e626f459.8dcdc8"]]
+  },
+  {
+    "id": "e626f459.8dcdc8",
+    "type": "mindconnect",
+    "z": "47ce5615.772208",
+    "name": "",
+    "configtype": "SHARED_SECRET",
+    "agentconfig": "",
+    "privatekey": "",
+    "model": "",
+    "validate": true,
+    "validateevent": true,
+    "chunk": false,
+    "disablekeepalive": false,
+    "retry": 3,
+    "parallel": 1,
+    "x": 450,
+    "y": 60,
+    "wires": [[]]
+  }
+]

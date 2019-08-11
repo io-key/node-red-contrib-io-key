@@ -50,9 +50,79 @@ Each node can output your data in the following formats:
   - [Measurement Message](https://www.eclipse.org/unide/specification/v2/measurement-message/#messageDetail) - for measurments
   - [Machine Message](https://www.eclipse.org/unide/specification/v2/machine-message#messageDetail) - for alarms and events
 
-## Demo flows
+## Example flows
 
-Demo flows are available at /examples
+<details><summary>Mindsphere</summary>
+<p>
+
+## Mindsphere Communication
+
+This flow establishes a connection to the mindsphere via the mindconnect node.
+
+## Getting Started
+
+### Step 1: Import Flow
+
+- Import the Node-RED flow from below
+
+### Step 2: Set up Mindsphere
+
+- Create a mindsphere asset
+- Generate an onboard token
+- Copy the onboard token into the mindconnect node
+
+### Step 2: Test it
+
+- Now you have successfully set up your Azure Communication
+
+```json
+[
+  {
+    "id": "47ce5615.772208",
+    "type": "tab",
+    "label": "Minsphere",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "3287aa3d.50b3f6",
+    "type": "measurements",
+    "z": "47ce5615.772208",
+    "name": "",
+    "auth": "",
+    "device": "",
+    "sensor": "",
+    "channel": "",
+    "format": "none",
+    "datapoint": "",
+    "x": 120,
+    "y": 60,
+    "wires": [["e626f459.8dcdc8"]]
+  },
+  {
+    "id": "e626f459.8dcdc8",
+    "type": "mindconnect",
+    "z": "47ce5615.772208",
+    "name": "",
+    "configtype": "SHARED_SECRET",
+    "agentconfig": "",
+    "privatekey": "",
+    "model": "",
+    "validate": true,
+    "validateevent": true,
+    "chunk": false,
+    "disablekeepalive": false,
+    "retry": 3,
+    "parallel": 1,
+    "x": 450,
+    "y": 60,
+    "wires": [[]]
+  }
+]
+```
+
+</p>
+</details>
 ​
 
 ## License
