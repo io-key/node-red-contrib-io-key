@@ -2,6 +2,8 @@
 
 ## Node-RED Connector for the [io-key](https://autosen.com/de/io-key)
 
+![node-red-contrib-mindconnect](images/iokey_logo.png)
+
 This collection of nodes contains three nodes to receive measurements, alarms and events from a sensor connected to an io-key.
 ​
 
