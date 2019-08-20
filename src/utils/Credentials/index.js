@@ -51,8 +51,10 @@ class Credentials {
           const id = host.split('.')[0];
           resolve(id);
         })
-        .catch(error => {
-          reject(error);
+        .catch(e => {
+          // On some tenants this request's will fail but they could be still valid
+          const id = hostname.split('.')[0];
+          resolve(id);
         });
     });
   }
@@ -70,6 +72,7 @@ class Credentials {
         })
       ) {
         reject({ error: 'Invalid credentials' });
+        return;
       }
 
       if (this.tenantId === '') {

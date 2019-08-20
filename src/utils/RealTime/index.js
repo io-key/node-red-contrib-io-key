@@ -67,10 +67,12 @@ class RealTime {
             e.error === 'subscribtion_failed'
           ) {
             this.handleSessionStartError();
+            return;
           }
         }
         if (e.code === 'EAI_AGAIN' || e.code === 'ECONNRESET') {
           this.handleSessionStartError();
+          return;
         }
       });
   }
@@ -141,7 +143,7 @@ class RealTime {
             resolve();
           } else {
             this.setStatus(this.STATUS_TYPES.CONNECTION_FAILED);
-            reject(reject({ error: 'handshake_failed' }));
+            reject({ error: 'handshake_failed' });
           }
         })
         .catch(e => {
