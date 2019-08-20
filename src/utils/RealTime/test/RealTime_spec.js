@@ -33,9 +33,7 @@ describe('Class Realtime', () => {
 
     expect(realTime.node).toEqual(node);
     expect(realTime.config).toEqual(config);
-    expect(realTime.credentials).toEqual(
-      'dGVuYW50L3Rlc3RlckB0ZXN0LmNvbTpwYXNzd29yZA=='
-    );
+    expect(realTime.encodedCredentials).toEqual('');
     expect(realTime.clientId).toEqual('');
     expect(realTime.connected).toEqual(false);
     expect(realTime.STATUS_TYPES).toBeDefined();
@@ -60,7 +58,7 @@ describe('Class Realtime', () => {
       node,
       {
         iokey: 'iokey1',
-        sensor: '1234',
+        sensor: '',
         channel: ''
       },
       auth
@@ -82,13 +80,13 @@ describe('Class Realtime', () => {
   it('it should start', () => {
     const realTime = new RealTime(node, config, auth);
     realTime.setStatus = jest.fn();
-    realTime.handshakeSession = jest.fn(
+    realTime.encodeCredentials = jest.fn(
       () => new Promise((resolve, reject) => resolve())
     );
 
     realTime.start();
     expect(realTime.setStatus).toHaveBeenCalledTimes(1);
-    expect(realTime.handshakeSession).toHaveBeenCalledTimes(1);
+    expect(realTime.encodeCredentials).toHaveBeenCalledTimes(1);
   });
 
   it('should successfully handshake session', done => {
@@ -344,19 +342,9 @@ describe('Class Realtime', () => {
   it('should validate sensor', () => {
     const realTime = new RealTime(node, config, auth);
     realTime.config.sensor = 'abc';
-    realTime.config.channel = '123';
     expect(realTime.validateSensor()).toBeTruthy();
 
     realTime.config.sensor = '';
-    realTime.config.channel = '123';
-    expect(realTime.validateSensor()).toBeFalsy();
-
-    realTime.config.sensor = 'abc';
-    realTime.config.channel = '';
-    expect(realTime.validateSensor()).toBeFalsy();
-
-    realTime.config.sensor = '';
-    realTime.config.channel = '';
     expect(realTime.validateSensor()).toBeFalsy();
   });
 });

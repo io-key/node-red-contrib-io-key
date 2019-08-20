@@ -24,6 +24,8 @@ module.exports = function(RED) {
 
       node.username = node.credentials.username;
       node.password = node.credentials.password;
+
+      node.c = new Credentials(node);
     }
   }
   RED.nodes.registerType('tenant-config', TenantConfig, {
@@ -36,9 +38,11 @@ module.exports = function(RED) {
 
   RED.httpAdmin.get('/iokeys/sensors', function(req, res) {
     try {
-      const encodedCredentials = Credentials.encode(node);
-
-      Devices.getSensors(node.tenant, encodedCredentials)
+      node.c
+        .getEncodedCredentials()
+        .then(encodedCredentials => {
+          return Devices.getSensors(node.tenant, encodedCredentials);
+        })
         .then(sensors => {
           res.json(sensors);
         })

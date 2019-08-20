@@ -12,7 +12,9 @@ class RealTime {
     this.node = node;
     this.config = config;
     this.auth = auth;
-    this.credentials = Credentials.encode(auth);
+    this.tenantId = '';
+    this.credentials = new Credentials(auth);
+    this.encodedCredentials = '';
 
     this.clientId = '';
     this.connected = false;
@@ -45,7 +47,10 @@ class RealTime {
 
     this.setStatus(this.STATUS_TYPES.CONNECTING);
 
-    this.handshakeSession()
+    this.encodeCredentials()
+      .then(() => {
+        return this.handshakeSession();
+      })
       .then(() => {
         return this.subscribeChannel();
       })
@@ -64,16 +69,38 @@ class RealTime {
             this.handleSessionStartError();
           }
         }
-        if (e.code === 'EAI_AGAIN') {
+        if (e.code === 'EAI_AGAIN' || e.code === 'ECONNRESET') {
           this.handleSessionStartError();
         }
       });
   }
 
+  /**
+   * Handles if failed to start and tries again after 10sec
+   */
   handleSessionStartError() {
     setTimeout(() => {
       this.start();
     }, 10000);
+  }
+
+  /**
+   * Checks if there are already encoded credentials and encodes them, if not
+   *
+   * @returns {Promise}
+   */
+  encodeCredentials() {
+    return new Promise((resolve, reject) => {
+      this.credentials
+        .getEncodedCredentials()
+        .then(encodedCredentials => {
+          this.encodedCredentials = encodedCredentials;
+          resolve();
+        })
+        .catch(e => {
+          reject(e);
+        });
+    });
   }
 
   /**
@@ -84,7 +111,7 @@ class RealTime {
    */
   handshakeSession() {
     const url = `https://${this.auth.tenant}/cep/realtime`;
-    const auth = `Basic ${this.credentials}`;
+    const auth = `Basic ${this.encodedCredentials}`;
     return new Promise((resolve, reject) => {
       axios({
         method: 'post',
@@ -146,7 +173,7 @@ class RealTime {
         url: `https://${this.auth.tenant}/cep/realtime`,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Basic ${this.credentials}`
+          Authorization: `Basic ${this.encodedCredentials}`
         },
         data: [
           {
@@ -197,7 +224,7 @@ class RealTime {
         url: `https://${this.auth.tenant}/cep/realtime`,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Basic ${this.credentials}`
+          Authorization: `Basic ${this.encodedCredentials}`
         },
         timeout: 90000,
         data: [
@@ -233,7 +260,7 @@ class RealTime {
           url: `https://${this.auth.tenant}/cep/realtime`,
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Basic ${this.credentials}`
+            Authorization: `Basic ${this.encodedCredentials}`
           },
           data: [
             {
@@ -379,8 +406,8 @@ class RealTime {
    * A method to validate if a valid sensor is selected
    */
   validateSensor() {
-    const { sensor = '', channel = '' } = this.config;
-    if (sensor === '' || channel === '') {
+    const { sensor = '' } = this.config;
+    if (sensor === '') {
       return false;
     } else {
       return true;

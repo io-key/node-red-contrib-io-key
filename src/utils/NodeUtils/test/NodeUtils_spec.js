@@ -5,7 +5,7 @@ describe('Node Utils', () => {
     const RED = {
       nodes: {
         getNode: jest.fn(() => ({
-          tenant: 'tenant',
+          tenant: 'tenant.cumulocity.com',
           username: 'tester@test.com',
           password: '1234'
         }))

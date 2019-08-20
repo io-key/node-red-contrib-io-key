@@ -2,9 +2,11 @@ const axios = require('axios');
 const helper = require('node-red-node-test-helper');
 const MockAdapter = require('axios-mock-adapter');
 const tenantConfig = require('../tenant-config');
+const Credentials = require('../../../utils/Credentials');
 
 const responseDevices = require('../../../utils/Devices/test/data/response_devices');
 const responseSensor = require('../../../utils/Devices/test/data/response_sensor');
+const responseLoginOptions = require('../../../utils/Credentials/test/data/response_loginOptions');
 
 helper.init(require.resolve('node-red'));
 
@@ -62,11 +64,22 @@ describe('tenant config node', () => {
       .onGet('https://tenant.cumulocity.com/inventory/managedObjects/1234')
       .reply(200, responseSensor);
 
+    mock
+      .onGet('https://tenant.cumulocity.com/tenant/loginOptions')
+      .reply(200, responseLoginOptions);
+
     helper.load(tenantConfig, flow, () => {
       const nc = helper.getNode('nc');
+
       nc.tenant = 'tenant.cumulocity.com';
       nc.username = 'tester@test.com';
       nc.password = '1234';
+
+      nc.c = new Credentials({
+        tenant: 'tenant.cumulocity.com',
+        username: 'tester@test.com',
+        password: '1234'
+      });
 
       helper
         .request()
