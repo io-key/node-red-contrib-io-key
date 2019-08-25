@@ -31,6 +31,12 @@ class RealTime {
       CONNECTION_FAILED: 'connection_failed'
     };
 
+    this.ERROR_TYPES = {
+      HANDSHAKE_FAILED: 'handshake_failed',
+      SUBSCRIPTION_FAILED: 'subscribtion_failed',
+      BAD_CRENETIALS: 'bad_credentials'
+    };
+
     node.on('close', () => {
       this.disconnect();
     });
@@ -63,11 +69,14 @@ class RealTime {
       .catch(e => {
         if (e.error) {
           if (
-            e.error === 'handshake_failed' ||
-            e.error === 'subscribtion_failed'
+            e.error === this.ERROR_TYPES.HANDSHAKE_FAILED ||
+            e.error === this.ERROR_TYPES.SUBSCRIPTION_FAILED
           ) {
             this.handleSessionStartError();
             return;
+          }
+          if ((e.error = this.ERROR_TYPES.BAD_CRENETIALS)) {
+            this.setStatus(this.STATUS_TYPES.INVALID_CREDENTIALS);
           }
         }
         if (e.code === 'EAI_AGAIN' || e.code === 'ECONNRESET') {
@@ -191,7 +200,7 @@ class RealTime {
           if (data && data.successful === true) {
             resolve();
           } else {
-            reject({ error: 'subscribtion_failed' });
+            reject(this.handleSubscribtionFail(data));
           }
         })
         .catch(e => {
@@ -332,6 +341,18 @@ class RealTime {
       this.handleExpiredSession();
     } else {
       this.startNewConnection();
+    }
+  }
+
+  /**
+   * Handles subscription fail
+   * @param  {object} data a realtime-notification which wasn't successfull
+   */
+  handleSubscribtionFail(data) {
+    if (data.error && data.error.includes('403')) {
+      return { error: 'bad_credentials' };
+    } else {
+      return { error: 'subscribtion_failed' };
     }
   }
 

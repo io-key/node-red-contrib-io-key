@@ -18,17 +18,17 @@
     inputs: 0,
     outputs: 1,
     icon: 'io.png',
-    label: function() {
+    label: function () {
       return this.name || 'measurements';
     },
-    oneditprepare: function() {
+    oneditprepare: function () {
       var node = this;
 
-      $.getScript('/js/common').done(function(data, textStatus, jqxhr) {
-        initUI(node);
+      $.getScript('/js/common').done(function (data, textStatus, jqxhr) {
+        UI(node);
       });
     },
-    oneditsave: function() {
+    oneditsave: function () {
       /**
        * Saves all selected values
        */

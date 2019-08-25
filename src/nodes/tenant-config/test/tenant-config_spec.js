@@ -2,7 +2,6 @@ const axios = require('axios');
 const helper = require('node-red-node-test-helper');
 const MockAdapter = require('axios-mock-adapter');
 const tenantConfig = require('../tenant-config');
-const Credentials = require('../../../utils/Credentials');
 
 const responseDevices = require('../../../utils/Devices/test/data/response_devices');
 const responseSensor = require('../../../utils/Devices/test/data/response_sensor');
@@ -21,7 +20,7 @@ const flow = [
 
 const mockSensors = [
   {
-    iokey: 'device_io-key-123456789012345',
+    iokey: '123456789012345-io-key',
     name: 'AU004',
     id: '1234',
     channels: [
@@ -56,7 +55,7 @@ describe('tenant config node', () => {
     const mock = new MockAdapter(axios);
     mock
       .onGet(
-        'https://tenant.cumulocity.com/inventory/managedObjects?fragmentType=c8y_IsDevice'
+        'https://tenant.cumulocity.com/inventory/managedObjects?fragmentType=c8y_IsDevice&pageSize=20&withTotalPages=true'
       )
       .reply(200, responseDevices);
 
@@ -75,15 +74,9 @@ describe('tenant config node', () => {
       nc.username = 'tester@test.com';
       nc.password = '1234';
 
-      nc.c = new Credentials({
-        tenant: 'tenant.cumulocity.com',
-        username: 'tester@test.com',
-        password: '1234'
-      });
-
       helper
         .request()
-        .get('/iokeys/sensors')
+        .get('/iokeys/sensors?auth=nc')
         .expect(200)
         .end((err, res) => {
           const sensors = res.body;
@@ -106,9 +99,15 @@ describe('tenant config node', () => {
       .reply(200, responseSensor);
 
     helper.load(tenantConfig, flow, () => {
+      const nc = helper.getNode('nc');
+
+      nc.tenant = 'tenant.cumulocity.com';
+      nc.username = 'tester@test.com';
+      nc.password = '1234';
+
       helper
         .request()
-        .get('/iokeys/sensors')
+        .get('/iokeys/sensors?auth=nc')
         .expect(200)
         .end((err, res) => {
           if (err) {

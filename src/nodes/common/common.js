@@ -1,4 +1,4 @@
-function initUI(node) {
+function UI(node) {
   var sensors = [];
 
   /**
@@ -147,8 +147,9 @@ function initUI(node) {
     addOptionToSelect('#node-input-iokey', 'Loading...', '');
 
     try {
-      $.getJSON('/iokeys/sensors', function(_sensors) {
+      $.getJSON('/iokeys/sensors', { auth: node.auth }, function(_sensors) {
         sensors = _sensors;
+        console.log(sensors);
 
         if (sensors.length > 0) {
           addIokeyOptions();
@@ -162,6 +163,27 @@ function initUI(node) {
       addOptionToSelect('#node-input-iokey', 'No io-keys found', '');
     }
   }
+
+  /**
+   * Adds an on change handler to the auth select
+   */
+  var initialLoad = true;
+  $('#node-input-auth').on('change', function(event) {
+    var value = $('#node-input-auth option:selected').val();
+    if (value === '' || typeof value === 'undefined') return;
+
+    if (value !== node.auth) {
+      clearSelect('#node-input-iokey');
+      clearSelect('#node-input-sensor');
+      clearSelect('#node-input-channel');
+    } else {
+      if (initialLoad === false) {
+        addIokeyOptions();
+      }
+    }
+
+    initialLoad = false;
+  });
 
   /**
    * Adds an on change handler to the io-key select

@@ -5,7 +5,7 @@ const responseDevices = require('./data/response_devices.json');
 const responseSensor = require('./data/response_sensor.json');
 
 const mockSensor = {
-  iokey: 'device_io-key-123456789012345',
+  iokey: '123456789012345-io-key',
   name: 'AU004',
   id: '1234',
   channels: [
@@ -17,7 +17,8 @@ const mockSensor = {
 };
 
 const mockIokey = {
-  name: 'device_io-key-123456789012345',
+  name: '123456789012345-io-key',
+  owner: 'device_io-key-123456789012345',
   type: 'io-key4',
   sensors: [
     {
@@ -34,7 +35,7 @@ describe('Class Devices', () => {
 
     mock
       .onGet(
-        'https://tenant.cumulocity.com/inventory/managedObjects?fragmentType=c8y_IsDevice'
+        'https://tenant.cumulocity.com/inventory/managedObjects?fragmentType=c8y_IsDevice&pageSize=20&withTotalPages=true'
       )
       .reply(200, responseDevices);
 
@@ -53,7 +54,7 @@ describe('Class Devices', () => {
 
     mock
       .onGet(
-        'https://tenant.cumulocity.com/inventory/managedObjects?fragmentType=c8y_IsDevice'
+        'https://tenant.cumulocity.com/inventory/managedObjects?fragmentType=c8y_IsDevice&pageSize=20&withTotalPages=true'
       )
       .reply(200, responseDevices);
 
@@ -76,7 +77,10 @@ describe('Class Devices', () => {
       .onGet('https://tenant.cumulocity.com/inventory/managedObjects/1234')
       .reply(200, responseSensor);
 
-    Devices.getSensor('tenant.cumulocity.com', 'fakeAuth', '1234')
+    Devices.getSensorDetails('tenant.cumulocity.com', 'fakeCredentials', {
+      id: '1234',
+      iokey: '123456789012345-io-key'
+    })
       .then(_sensor => {
         expect(_sensor).toEqual(mockSensor);
         done();
@@ -84,7 +88,7 @@ describe('Class Devices', () => {
       .catch(e => done.fail(e));
   });
 
-  it('get devices from response', () => {
+  it('get iokeys from response', () => {
     const devicesFromResponse = Devices.getIokeysFromResponse({
       data: responseDevices
     });
@@ -96,11 +100,21 @@ describe('Class Devices', () => {
     const sensorFromResponse = Devices.getSensorFromResponse({
       data: responseSensor
     });
+    const mockSensor = {
+      name: 'AU004',
+      id: '1234',
+      channels: [
+        '123456789012345-AU004-1-1',
+        '123456789012345-AU004-1-2',
+        '123456789012345-AU004-1-3',
+        '123456789012345-AU004-1-4'
+      ]
+    };
 
     expect(sensorFromResponse).toEqual(mockSensor);
   });
 
-  it('getSensorsIds', () => {
+  it('getSensors', () => {
     const iokeys = [
       {
         name: 'device_io-key-123456789012345',
@@ -131,8 +145,29 @@ describe('Class Devices', () => {
         ]
       }
     ];
-    const sensorIds = ['1234', '2345', '3456', '4567'];
+    const sensors = [
+      {
+        iokey: 'device_io-key-123456789012345',
+        name: 'AU004',
+        id: '1234'
+      },
+      {
+        iokey: 'device_io-key-123456789012345',
+        name: 'AU004',
+        id: '2345'
+      },
+      {
+        iokey: 'device_io-key-234567890123456',
+        name: 'AU004',
+        id: '3456'
+      },
+      {
+        iokey: 'device_io-key-234567890123456',
+        name: 'AU004',
+        id: '4567'
+      }
+    ];
 
-    expect(Devices.getSensorIdsFromIokeys(iokeys)).toEqual(sensorIds);
+    expect(Devices.getSensorsFromIokeys(iokeys)).toEqual(sensors);
   });
 });

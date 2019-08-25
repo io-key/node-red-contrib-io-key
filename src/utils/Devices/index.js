@@ -31,10 +31,10 @@ class Devices {
           iokeys = _iokeys;
 
           // create a request for every sensor of the io-keys
-          const sensorIds = this.getSensorIdsFromIokeys(iokeys);
-          const sensorRequests = sensorIds.map(sensorId => {
+          const sensors = this.getSensorsFromIokeys(iokeys);
+          const sensorRequests = sensors.map(sensor => {
             return new Promise((resolve, reject) => {
-              this.getSensor(tenant, credentials, sensorId)
+              this.getSensorDetails(tenant, credentials, sensor)
                 .then(sensor => resolve(sensor))
                 .catch(e => resolve([]));
             });
@@ -70,17 +70,20 @@ class Devices {
       ]
     }
    */
-  static getSensor(tenant, credentials, sensorId) {
+  static getSensorDetails(tenant, credentials, sensor) {
     return new Promise((resolve, reject) => {
       axios
-        .get(`https://${tenant}/inventory/managedObjects/${sensorId}`, {
+        .get(`https://${tenant}/inventory/managedObjects/${sensor.id}`, {
           headers: {
             Authorization: `Basic ${credentials}`
           }
         })
         .then(response => {
-          const sensor = this.getSensorFromResponse(response);
-          resolve(sensor);
+          const detailedSensor = this.getSensorFromResponse(response);
+          resolve({
+            ...detailedSensor,
+            iokey: sensor.iokey
+          });
         })
         .catch(error => {
           reject();
@@ -95,19 +98,28 @@ class Devices {
    * @param  {string} credentials base64 encoded credentials
    * @returns {Promise<array>} return a list of all iokeys
    */
-  static getIokeys(tenant, credentials) {
+  static getIokeys(tenant, credentials, lastIokeys = [], nextUrl) {
+    let url = `https://${tenant}/inventory/managedObjects?fragmentType=c8y_IsDevice&pageSize=20&withTotalPages=true`;
+    if (nextUrl) url = nextUrl;
+
     return new Promise((resolve, reject) => {
       axios
-        .get(
-          `https://${tenant}/inventory/managedObjects?fragmentType=c8y_IsDevice`,
-          {
-            headers: {
-              Authorization: `Basic ${credentials}`
-            }
+        .get(url, {
+          headers: {
+            Authorization: `Basic ${credentials}`
           }
-        )
+        })
         .then(response => {
-          const iokeys = this.getIokeysFromResponse(response);
+          const newIokeys = this.getIokeysFromResponse(response);
+          const iokeys = [...lastIokeys, ...newIokeys];
+
+          const { next, statistics } = response.data;
+
+          if (next && statistics.currentPage < statistics.totalPages) {
+            resolve(this.getIokeys(tenant, credentials, iokeys, next));
+            return;
+          }
+
           resolve(iokeys);
         })
         .catch(error => {
@@ -144,7 +156,6 @@ class Devices {
     });
 
     return {
-      iokey: data.owner,
       name: data.name,
       id: data.id,
       channels: channels.sort()
@@ -183,7 +194,8 @@ class Devices {
       }
 
       return {
-        name: device.owner,
+        owner: device.owner,
+        name: device.name,
         type: device.type,
         sensors
       };
@@ -196,16 +208,29 @@ class Devices {
    * @param  {array} iokeys a list of iokeys
    * @return {array} a list of sensorIds
    *
-   * ["1234","2345","3456","4567"]
+   * [
+   *  {
+   *    iokey: 'device_io-key-123456789012345',
+   *    name: 'AU004',
+   *    id: '1234'
+   *  },
+   *  ...
+   * ]
    */
-  static getSensorIdsFromIokeys(iokeys) {
-    let sensorsIds = [];
+  static getSensorsFromIokeys(iokeys) {
+    let sensors = [];
 
     iokeys.forEach(iokey => {
-      sensorsIds = [...sensorsIds, ...iokey.sensors.map(({ id }) => id)];
+      sensors = [
+        ...sensors,
+        ...iokey.sensors.map(sensor => ({
+          ...sensor,
+          iokey: iokey.name
+        }))
+      ];
     });
 
-    return sensorsIds;
+    return sensors;
   }
 }
 
