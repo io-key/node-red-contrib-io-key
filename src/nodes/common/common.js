@@ -149,7 +149,6 @@ function UI(node) {
     try {
       $.getJSON('/iokeys/sensors', { auth: node.auth }, function(_sensors) {
         sensors = _sensors;
-        console.log(sensors);
 
         if (sensors.length > 0) {
           addIokeyOptions();
