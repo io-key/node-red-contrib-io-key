@@ -77,7 +77,49 @@ This flow establishes a connection to the mindsphere via the mindconnect node.
 ### Flow:
 
 ```json
-[{"id":"47ce5615.772208","type":"tab","label":"Minsphere","disabled":false,"info":""},{"id":"3287aa3d.50b3f6","type":"measurements","z":"47ce5615.772208","name":"","auth":"","device":"","sensor":"","channel":"","format":"none","datapoint":"","x":120,"y":60,"wires":[["e626f459.8dcdc8"]]},{"id":"e626f459.8dcdc8","type":"mindconnect","z":"47ce5615.772208","name":"","configtype":"SHARED_SECRET","agentconfig":"","privatekey":"","model":"","validate":true,"validateevent":true,"chunk":false,"disablekeepalive":false,"retry":3,"parallel":1,"x":450,"y":60,"wires":[[]]}]
+[
+  {
+    "id": "47ce5615.772208",
+    "type": "tab",
+    "label": "Minsphere",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "3287aa3d.50b3f6",
+    "type": "measurements",
+    "z": "47ce5615.772208",
+    "name": "",
+    "auth": "",
+    "device": "",
+    "sensor": "",
+    "channel": "",
+    "format": "none",
+    "datapoint": "",
+    "x": 120,
+    "y": 60,
+    "wires": [["e626f459.8dcdc8"]]
+  },
+  {
+    "id": "e626f459.8dcdc8",
+    "type": "mindconnect",
+    "z": "47ce5615.772208",
+    "name": "",
+    "configtype": "SHARED_SECRET",
+    "agentconfig": "",
+    "privatekey": "",
+    "model": "",
+    "validate": true,
+    "validateevent": true,
+    "chunk": false,
+    "disablekeepalive": false,
+    "retry": 3,
+    "parallel": 1,
+    "x": 450,
+    "y": 60,
+    "wires": [[]]
+  }
+]
 ```
 
 ## Push-Notification Example
@@ -126,7 +168,186 @@ If this is the case, a push notification is sent to the configured smartphone.
 ### Flow:
 
 ```json
-[{"id":"cb8a1fee.fc79e","type":"tab","label":"Push-Notifications","disabled":false,"info":""},{"id":"ff80110a.bbf1b","type":"measurements","z":"cb8a1fee.fc79e","name":"","auth":"","device":"","sensor":"","channel":"","format":"none","datapoint":"","x":121,"y":417.69099617004395,"wires":[["6474c00d.0a9b","56020173.dcd22","b1dd7ed5.910ab","75f8c985.47c648","1922e31e.0feddd","8befdcb8.87eba"]]},{"id":"e9acaa50.e2a9f8","type":"function","z":"cb8a1fee.fc79e","name":"Controll condition and hysteresis","func":"const hysteresisMet = flow.get('hysteresisMet25')||false;\n\nlet data = {}\ndata.payload=`Slight overtemperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet25', false);\n    return data\n}\n","outputs":1,"noerr":0,"x":861.5207366943359,"y":266.9237251281738,"wires":[["ae84aeec.757c"]]},{"id":"8befdcb8.87eba","type":"function","z":"cb8a1fee.fc79e","name":">=25","func":"\n\n\n\n\nif(msg.payload.value>=25 && msg.payload.value<35){\n    msg.payload.condition=true\n   \n}else{\n    msg.payload.condition=false\n}\nreturn msg ","outputs":1,"noerr":0,"x":566.0171966552734,"y":266.0104503631592,"wires":[["e9acaa50.e2a9f8"]],"inputLabels":["Actual Value"],"icon":"node-red-dashboard/ui_numeric.png"},{"id":"6474c00d.0a9b","type":"function","z":"cb8a1fee.fc79e","name":">=35","func":"if(msg.payload.value>=35 && msg.payload.value<45){\n    msg.payload.condition=true\n   \n}else{\n    msg.payload.condition=false\n}\nreturn msg ","outputs":1,"noerr":0,"x":565.0173225402832,"y":428.0103931427002,"wires":[["bb4a0aff.247518"]],"inputLabels":["Actual Value"],"icon":"node-red-dashboard/ui_numeric.png"},{"id":"56020173.dcd22","type":"function","z":"cb8a1fee.fc79e","name":">=45","func":"if(msg.payload.value>45){\n    msg.payload.condition=true\n   \n}else{\n    msg.payload.condition=false\n}\nreturn msg ","outputs":1,"noerr":0,"x":559.0173263549805,"y":588.0104846954346,"wires":[["1b61c824.d21108"]],"inputLabels":["Actual Value"],"icon":"node-red-dashboard/ui_numeric.png"},{"id":"c1b421e7.c43f4","type":"comment","z":"cb8a1fee.fc79e","name":"Flow Description","info":"This flow is used to check whether temperature\nthresholds have been exceeded. If this is the \ncase, a push notification is sent to the configured\nsmartphone. (A limit of one notification per minute has been set)","x":131.52429962158203,"y":149.92015838623047,"wires":[]},{"id":"1922e31e.0feddd","type":"function","z":"cb8a1fee.fc79e","name":"Hysteresis 10 %","func":"\n\nconst value = msg.payload.value\nconst HYSTERESIS = 10 // %\nconst THRESHOLD = 25 // °C\n\n\n\nif(value < THRESHOLD * (1- HYSTERESIS/100) ){\n    flow.set('hysteresisMet25', true);\n}","outputs":1,"noerr":0,"x":537.9062347412109,"y":210.34382438659668,"wires":[[]]},{"id":"75f8c985.47c648","type":"function","z":"cb8a1fee.fc79e","name":"Hysteresis 10 %","func":"\n\nconst value = msg.payload.value\nconst HYSTERESIS = 10 // %\nconst THRESHOLD = 35 // °C\n\n\n\n\nif(value < THRESHOLD * (1- HYSTERESIS/100) ){\n    flow.set('hysteresisMet35', true);\n}","outputs":1,"noerr":0,"x":534.0173645019531,"y":382.0104064941406,"wires":[[]]},{"id":"b1dd7ed5.910ab","type":"function","z":"cb8a1fee.fc79e","name":"Hysteresis 10 %","func":"\n\nconst value = msg.payload.value\nconst HYSTERESIS = 10 // %\nconst THRESHOLD = 45 // °C\n\n\n\n\nif(value < THRESHOLD * (1- HYSTERESIS/100) ){\n    flow.set('hysteresisMet45', true);\n}","outputs":1,"noerr":0,"x":534.0173721313477,"y":541.0103950500488,"wires":[[]]},{"id":"bb4a0aff.247518","type":"function","z":"cb8a1fee.fc79e","name":"Controll condition and hysteresis","func":"const hysteresisMet = flow.get('hysteresisMet35')||false;\n\nlet data = {}\ndata.payload=`Slight overtemperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet35', false);\n    return data\n}\n","outputs":1,"noerr":0,"x":863.017333984375,"y":426.0104064941406,"wires":[["ae84aeec.757c"]]},{"id":"1b61c824.d21108","type":"function","z":"cb8a1fee.fc79e","name":"Controll condition and hysteresis","func":"const hysteresisMet = flow.get('hysteresisMet45')||false;\n\nlet data = {}\ndata.payload=`Slight overtemperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet45', false);\n    return data\n}\n","outputs":1,"noerr":0,"x":861.017333984375,"y":591.0104370117188,"wires":[["ae84aeec.757c"]]},{"id":"ae84aeec.757c","type":"function","z":"cb8a1fee.fc79e","name":"LimitPerMinute = 1","func":"\nlet lastSend = context.get('lastSend')||0;\nlet currentTimestamp = new Date().getTime();\n\n//  Calculate difference between last and latest notification\nlet diffMilli = Math.abs(currentTimestamp - lastSend)\n\n// Convert milliseconds into minutes\nlet diffMin = diffMilli/(1000*60)\n  \n  \nif(diffMin > 1){\n    context.set('lastSend', currentTimestamp);\n    return msg;\n}","outputs":1,"noerr":0,"x":1261.0695266723633,"y":435.2292881011963,"wires":[["3de6ef84.6cd47"]]},{"id":"3de6ef84.6cd47","type":"pushover api","z":"cb8a1fee.fc79e","keys":"","title":"","name":"","x":1548.1667098999023,"y":432.6666793823242,"wires":[]}]
+[
+  {
+    "id": "cb8a1fee.fc79e",
+    "type": "tab",
+    "label": "Push-Notifications",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "ff80110a.bbf1b",
+    "type": "measurements",
+    "z": "cb8a1fee.fc79e",
+    "name": "",
+    "auth": "",
+    "device": "",
+    "sensor": "",
+    "channel": "",
+    "format": "none",
+    "datapoint": "",
+    "x": 121,
+    "y": 417.69099617004395,
+    "wires": [
+      [
+        "6474c00d.0a9b",
+        "56020173.dcd22",
+        "b1dd7ed5.910ab",
+        "75f8c985.47c648",
+        "1922e31e.0feddd",
+        "8befdcb8.87eba"
+      ]
+    ]
+  },
+  {
+    "id": "e9acaa50.e2a9f8",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "Controll condition and hysteresis",
+    "func": "const hysteresisMet = flow.get('hysteresisMet25')||false;\n\nlet data = {}\ndata.payload=`Slight overtemperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet25', false);\n    return data\n}\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 861.5207366943359,
+    "y": 266.9237251281738,
+    "wires": [["ae84aeec.757c"]]
+  },
+  {
+    "id": "8befdcb8.87eba",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": ">=25",
+    "func": "\n\n\n\n\nif(msg.payload.value>=25 && msg.payload.value<35){\n    msg.payload.condition=true\n   \n}else{\n    msg.payload.condition=false\n}\nreturn msg ",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 566.0171966552734,
+    "y": 266.0104503631592,
+    "wires": [["e9acaa50.e2a9f8"]],
+    "inputLabels": ["Actual Value"],
+    "icon": "node-red-dashboard/ui_numeric.png"
+  },
+  {
+    "id": "6474c00d.0a9b",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": ">=35",
+    "func": "if(msg.payload.value>=35 && msg.payload.value<45){\n    msg.payload.condition=true\n   \n}else{\n    msg.payload.condition=false\n}\nreturn msg ",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 565.0173225402832,
+    "y": 428.0103931427002,
+    "wires": [["bb4a0aff.247518"]],
+    "inputLabels": ["Actual Value"],
+    "icon": "node-red-dashboard/ui_numeric.png"
+  },
+  {
+    "id": "56020173.dcd22",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": ">=45",
+    "func": "if(msg.payload.value>45){\n    msg.payload.condition=true\n   \n}else{\n    msg.payload.condition=false\n}\nreturn msg ",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 559.0173263549805,
+    "y": 588.0104846954346,
+    "wires": [["1b61c824.d21108"]],
+    "inputLabels": ["Actual Value"],
+    "icon": "node-red-dashboard/ui_numeric.png"
+  },
+  {
+    "id": "c1b421e7.c43f4",
+    "type": "comment",
+    "z": "cb8a1fee.fc79e",
+    "name": "Flow Description",
+    "info": "This flow is used to check whether temperature\nthresholds have been exceeded. If this is the \ncase, a push notification is sent to the configured\nsmartphone. (A limit of one notification per minute has been set)",
+    "x": 131.52429962158203,
+    "y": 149.92015838623047,
+    "wires": []
+  },
+  {
+    "id": "1922e31e.0feddd",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "Hysteresis 10 %",
+    "func": "\n\nconst value = msg.payload.value\nconst HYSTERESIS = 10 // %\nconst THRESHOLD = 25 // °C\n\n\n\nif(value < THRESHOLD * (1- HYSTERESIS/100) ){\n    flow.set('hysteresisMet25', true);\n}",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 537.9062347412109,
+    "y": 210.34382438659668,
+    "wires": [[]]
+  },
+  {
+    "id": "75f8c985.47c648",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "Hysteresis 10 %",
+    "func": "\n\nconst value = msg.payload.value\nconst HYSTERESIS = 10 // %\nconst THRESHOLD = 35 // °C\n\n\n\n\nif(value < THRESHOLD * (1- HYSTERESIS/100) ){\n    flow.set('hysteresisMet35', true);\n}",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 534.0173645019531,
+    "y": 382.0104064941406,
+    "wires": [[]]
+  },
+  {
+    "id": "b1dd7ed5.910ab",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "Hysteresis 10 %",
+    "func": "\n\nconst value = msg.payload.value\nconst HYSTERESIS = 10 // %\nconst THRESHOLD = 45 // °C\n\n\n\n\nif(value < THRESHOLD * (1- HYSTERESIS/100) ){\n    flow.set('hysteresisMet45', true);\n}",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 534.0173721313477,
+    "y": 541.0103950500488,
+    "wires": [[]]
+  },
+  {
+    "id": "bb4a0aff.247518",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "Controll condition and hysteresis",
+    "func": "const hysteresisMet = flow.get('hysteresisMet35')||false;\n\nlet data = {}\ndata.payload=`Slight overtemperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet35', false);\n    return data\n}\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 863.017333984375,
+    "y": 426.0104064941406,
+    "wires": [["ae84aeec.757c"]]
+  },
+  {
+    "id": "1b61c824.d21108",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "Controll condition and hysteresis",
+    "func": "const hysteresisMet = flow.get('hysteresisMet45')||false;\n\nlet data = {}\ndata.payload=`Slight overtemperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet45', false);\n    return data\n}\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 861.017333984375,
+    "y": 591.0104370117188,
+    "wires": [["ae84aeec.757c"]]
+  },
+  {
+    "id": "ae84aeec.757c",
+    "type": "function",
+    "z": "cb8a1fee.fc79e",
+    "name": "LimitPerMinute = 1",
+    "func": "\nlet lastSend = context.get('lastSend')||0;\nlet currentTimestamp = new Date().getTime();\n\n//  Calculate difference between last and latest notification\nlet diffMilli = Math.abs(currentTimestamp - lastSend)\n\n// Convert milliseconds into minutes\nlet diffMin = diffMilli/(1000*60)\n  \n  \nif(diffMin > 1){\n    context.set('lastSend', currentTimestamp);\n    return msg;\n}",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 1261.0695266723633,
+    "y": 435.2292881011963,
+    "wires": [["3de6ef84.6cd47"]]
+  },
+  {
+    "id": "3de6ef84.6cd47",
+    "type": "pushover api",
+    "z": "cb8a1fee.fc79e",
+    "keys": "",
+    "title": "",
+    "name": "",
+    "x": 1548.1667098999023,
+    "y": 432.6666793823242,
+    "wires": []
+  }
+]
 ```
 
 ## Dual Silo Monitoring Example
@@ -181,7 +402,53 @@ This flow establishes a connection to the azure cloud via mqtt.
 ### Flow:
 
 ```json
-[{"id":"cf0985f9.a4cf68","type":"tab","label":"Azure","disabled":false,"info":""},{"id":"48ca0ad7.46ead4","type":"mqtt out","z":"cf0985f9.a4cf68","name":"","topic":"","qos":"1","retain":"false","broker":"","x":500.00001525878906,"y":351.0000104904175,"wires":[]},{"id":"74973997.753bb8","type":"measurements","z":"cf0985f9.a4cf68","name":"","auth":"","device":"device_io-key-357142090031740","sensor":"869876","channel":"357142090031740-AU004-1-1","format":"none","datapoint":"","x":290.00001525878906,"y":351.0000104904175,"wires":[["48ca0ad7.46ead4"]]},{"id":"f7d01b48.8698d8","type":"comment","z":"cf0985f9.a4cf68","name":"Flow Description","info":"This flow establishes a connection to the \nAzure cloud via MQTT.","x":294.1666717529297,"y":240.66669273376465,"wires":[]}]
+[
+  {
+    "id": "cf0985f9.a4cf68",
+    "type": "tab",
+    "label": "Azure",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "48ca0ad7.46ead4",
+    "type": "mqtt out",
+    "z": "cf0985f9.a4cf68",
+    "name": "",
+    "topic": "",
+    "qos": "1",
+    "retain": "false",
+    "broker": "",
+    "x": 500.00001525878906,
+    "y": 351.0000104904175,
+    "wires": []
+  },
+  {
+    "id": "74973997.753bb8",
+    "type": "measurements",
+    "z": "cf0985f9.a4cf68",
+    "name": "",
+    "auth": "",
+    "device": "device_io-key-357142090031740",
+    "sensor": "869876",
+    "channel": "357142090031740-AU004-1-1",
+    "format": "none",
+    "datapoint": "",
+    "x": 290.00001525878906,
+    "y": 351.0000104904175,
+    "wires": [["48ca0ad7.46ead4"]]
+  },
+  {
+    "id": "f7d01b48.8698d8",
+    "type": "comment",
+    "z": "cf0985f9.a4cf68",
+    "name": "Flow Description",
+    "info": "This flow establishes a connection to the \nAzure cloud via MQTT.",
+    "x": 294.1666717529297,
+    "y": 240.66669273376465,
+    "wires": []
+  }
+]
 ```
 
 ## AWS Flow
@@ -208,7 +475,53 @@ With this flow sensor data can be directly published via MQTT to an AWS IOT Brok
 ### Flow:
 
 ```json
-[{"id":"85547a1.b984788","type":"tab","label":"AWS","disabled":false,"info":""},{"id":"cb2d26c8.7703d8","type":"measurements","z":"85547a1.b984788","name":"","auth":"","device":"device_io-key-357142090032045","sensor":"887565","channel":"357142090032045-AL002-1-1","format":"none","datapoint":"","x":301.0174026489258,"y":300.0103988647461,"wires":[["e9449efb.24ad7"]]},{"id":"cf25cafd.54f178","type":"comment","z":"85547a1.b984788","name":"Flow Description","info":"With this flow sensor data can be directly published\nvia MQTT.","x":302.0173645019531,"y":204.01043033599854,"wires":[]},{"id":"e9449efb.24ad7","type":"mqtt out","z":"85547a1.b984788","name":"","topic":"","qos":"","retain":"","broker":"","x":610.0693817138672,"y":299.4965190887451,"wires":[]}]
+[
+  {
+    "id": "85547a1.b984788",
+    "type": "tab",
+    "label": "AWS",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "cb2d26c8.7703d8",
+    "type": "measurements",
+    "z": "85547a1.b984788",
+    "name": "",
+    "auth": "",
+    "device": "device_io-key-357142090032045",
+    "sensor": "887565",
+    "channel": "357142090032045-AL002-1-1",
+    "format": "none",
+    "datapoint": "",
+    "x": 301.0174026489258,
+    "y": 300.0103988647461,
+    "wires": [["e9449efb.24ad7"]]
+  },
+  {
+    "id": "cf25cafd.54f178",
+    "type": "comment",
+    "z": "85547a1.b984788",
+    "name": "Flow Description",
+    "info": "With this flow sensor data can be directly published\nvia MQTT.",
+    "x": 302.0173645019531,
+    "y": 204.01043033599854,
+    "wires": []
+  },
+  {
+    "id": "e9449efb.24ad7",
+    "type": "mqtt out",
+    "z": "85547a1.b984788",
+    "name": "",
+    "topic": "",
+    "qos": "",
+    "retain": "",
+    "broker": "",
+    "x": 610.0693817138672,
+    "y": 299.4965190887451,
+    "wires": []
+  }
+]
 ```
 
 ## Amazon Alexa Example
@@ -238,8 +551,97 @@ For deeper functions alexa skills are needed. You find more information to this 
 ### Flow:
 
 ```json
-[{"id":"8f390e05.0dcbf","type":"tab","label":"Alexa/Mindsphere","disabled":false,"info":""},{"id":"3e5ec454.5ac53c","type":"alexa-local","z":"8f390e05.0dcbf","devicename":"IO Key Data Transfer","inputtrigger":true,"x":249.07652282714844,"y":346.61108112335205,"wires":[["a301cad5.02aee8"]]},{"id":"45c49674.b81d28","type":"measurements","z":"8f390e05.0dcbf","name":"","auth":"","device":"device_io-key-357142090032045","sensor":"887565","channel":"357142090032045-AL002-1-1","format":"mdsp","datapoint":"1559295264254","x":234.07290649414062,"y":457.30905532836914,"wires":[["dd6804c2.19fff8"]]},{"id":"580901cf.58c0a","type":"mindconnect","z":"8f390e05.0dcbf","name":"","configtype":"SHARED_SECRET","agentconfig":"","privatekey":"","model":"","validate":true,"validateevent":true,"chunk":false,"disablekeepalive":false,"retry":3,"parallel":1,"x":816.0797348022461,"y":453.76736068725586,"wires":[[]]},{"id":"a301cad5.02aee8","type":"function","z":"8f390e05.0dcbf","name":"Data Transfer","func":"if(msg.on === true||msg.payload.on === true){\n    flow.set('dataTransfer', true);\n  \n}else{\n    flow.set('dataTransfer', false);\n    \n}\n\nreturn msg;","outputs":1,"noerr":0,"x":524.069522857666,"y":346.7604446411133,"wires":[[]],"icon":"node-red-contrib-alexa-local/alexa-local.png"},{"id":"dd6804c2.19fff8","type":"function","z":"8f390e05.0dcbf","name":"Controll","func":"let dataTransfer = flow.get('dataTransfer')||false;\n\nif(dataTransfer === true){\n    return msg\n}\n\n","outputs":1,"noerr":0,"x":504.0173149108887,"y":456.0103750228882,"wires":[["580901cf.58c0a"]]},{"id":"84402137.8d624","type":"comment","z":"8f390e05.0dcbf","name":"Flow Description","info":"With this flow you can activate or deactivate\nthe data transfer to a cloud platform (here \nmindsphere) via alexa spoken command.","x":230.01734924316406,"y":239.0104465484619,"wires":[]}]
+[
+  {
+    "id": "8f390e05.0dcbf",
+    "type": "tab",
+    "label": "Alexa/Mindsphere",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "3e5ec454.5ac53c",
+    "type": "alexa-local",
+    "z": "8f390e05.0dcbf",
+    "devicename": "IO Key Data Transfer",
+    "inputtrigger": true,
+    "x": 249.07652282714844,
+    "y": 346.61108112335205,
+    "wires": [["a301cad5.02aee8"]]
+  },
+  {
+    "id": "45c49674.b81d28",
+    "type": "measurements",
+    "z": "8f390e05.0dcbf",
+    "name": "",
+    "auth": "",
+    "device": "device_io-key-357142090032045",
+    "sensor": "887565",
+    "channel": "357142090032045-AL002-1-1",
+    "format": "mdsp",
+    "datapoint": "1559295264254",
+    "x": 234.07290649414062,
+    "y": 457.30905532836914,
+    "wires": [["dd6804c2.19fff8"]]
+  },
+  {
+    "id": "580901cf.58c0a",
+    "type": "mindconnect",
+    "z": "8f390e05.0dcbf",
+    "name": "",
+    "configtype": "SHARED_SECRET",
+    "agentconfig": "",
+    "privatekey": "",
+    "model": "",
+    "validate": true,
+    "validateevent": true,
+    "chunk": false,
+    "disablekeepalive": false,
+    "retry": 3,
+    "parallel": 1,
+    "x": 816.0797348022461,
+    "y": 453.76736068725586,
+    "wires": [[]]
+  },
+  {
+    "id": "a301cad5.02aee8",
+    "type": "function",
+    "z": "8f390e05.0dcbf",
+    "name": "Data Transfer",
+    "func": "if(msg.on === true||msg.payload.on === true){\n    flow.set('dataTransfer', true);\n  \n}else{\n    flow.set('dataTransfer', false);\n    \n}\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 524.069522857666,
+    "y": 346.7604446411133,
+    "wires": [[]],
+    "icon": "node-red-contrib-alexa-local/alexa-local.png"
+  },
+  {
+    "id": "dd6804c2.19fff8",
+    "type": "function",
+    "z": "8f390e05.0dcbf",
+    "name": "Controll",
+    "func": "let dataTransfer = flow.get('dataTransfer')||false;\n\nif(dataTransfer === true){\n    return msg\n}\n\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 504.0173149108887,
+    "y": 456.0103750228882,
+    "wires": [["580901cf.58c0a"]]
+  },
+  {
+    "id": "84402137.8d624",
+    "type": "comment",
+    "z": "8f390e05.0dcbf",
+    "name": "Flow Description",
+    "info": "With this flow you can activate or deactivate\nthe data transfer to a cloud platform (here \nmindsphere) via alexa spoken command.",
+    "x": 230.01734924316406,
+    "y": 239.0104465484619,
+    "wires": []
+  }
+]
 ```
+
+## Development
 
 ## License
 

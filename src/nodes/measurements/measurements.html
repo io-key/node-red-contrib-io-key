@@ -6,15 +6,16 @@
       name: { value: '' },
       auth: {
         value: { tenant: '', username: '', password: '' },
-        type: 'tenant-config'
+        type: 'tenant-config',
       },
       device: { value: '' },
       sensor: { value: '' },
       channel: { value: '' },
       format: { value: 'none' },
-      datapoint: { value: '' }
+      datapoint: { value: '' },
     },
-    color: '#73bb1e',
+    color: '#356a96',
+    labelStyle: 'color: #fff',
     inputs: 0,
     outputs: 1,
     icon: 'io.png',
@@ -43,7 +44,7 @@
       this.sensor = sensor;
       this.channel = channel;
       this.datapoint = datapoint;
-    }
+    },
   });
 </script>
 
