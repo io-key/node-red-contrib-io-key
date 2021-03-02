@@ -1,4 +1,4 @@
-module.exports = function(RED) {
+module.exports = function (RED) {
   const path = require('path');
   const Devices = require('../../utils/Devices');
   const Credentials = require('../../utils/Credentials');
@@ -8,16 +8,7 @@ module.exports = function(RED) {
     this.name = n.name;
 
     if (this.credentials) {
-      // Nodejs does not accept the autosen.cloud certificate
-      try {
-        this.tenant = this.credentials.tenant.replace(
-          'autosen.cloud',
-          'cumulocity.com'
-        );
-      } catch (e) {
-        this.tenant = this.credentials.tenant;
-      }
-
+      this.tenant = this.credentials.tenant;
       this.username = this.credentials.username;
       this.password = this.credentials.password;
     }
@@ -30,7 +21,7 @@ module.exports = function(RED) {
     }
   });
 
-  RED.httpAdmin.get('/iokeys/sensors', function(req, res) {
+  RED.httpAdmin.get('/iokeys/sensors', function (req, res) {
     try {
       const node = RED.nodes.getNode(req.query.auth);
       const credentials = new Credentials(node);
@@ -56,7 +47,7 @@ module.exports = function(RED) {
       });
     }
   });
-  RED.httpAdmin.get('/js/common', function(req, res) {
+  RED.httpAdmin.get('/js/common', function (req, res) {
     const filename = path.join(__dirname, '../common/common.js');
     res.sendFile(filename);
   });

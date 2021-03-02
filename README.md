@@ -49,14 +49,14 @@ Each node can output your data in the following formats:
 
 * PPMP: The node will output a standardized PPMP message
 
-  - [Measurement Message](https://www.eclipse.org/unide/specification/v2/measurement-message/#messageDetail) - for measurments
+  - [Measurement Message](https://www.eclipse.org/unide/specification/v2/measurement-message/#messageDetail) - for measurements
   - [Machine Message](https://www.eclipse.org/unide/specification/v2/machine-message#messageDetail) - for alarms and events
 
 ## Example flows
 
-## Mindsphere Communication
+## MindSphere Communication
 
-This flow establishes a connection to the mindsphere via the mindconnect node.
+This flow establishes a connection to the MindSphere via the mindconnect node.
 
 ## Getting Started
 
@@ -64,15 +64,15 @@ This flow establishes a connection to the mindsphere via the mindconnect node.
 
 - Import the Node-RED flow from below
 
-### Step 2: Set up Mindsphere
+### Step 2: Set up MindSphere
 
-- Create a mindsphere asset
+- Create a MindSphere asset
 - Generate an onboard token
 - Copy the onboard token into the mindconnect node
 
-### Step 2: Test it
+### Step 3: Test it
 
-- Now you have successfully set up your Azure Communication
+- Now you have successfully set up your MindSphere Communication
 
 ### Flow:
 
@@ -81,7 +81,7 @@ This flow establishes a connection to the mindsphere via the mindconnect node.
   {
     "id": "47ce5615.772208",
     "type": "tab",
-    "label": "Minsphere",
+    "label": "Mindsphere",
     "disabled": false,
     "info": ""
   },
@@ -143,7 +143,7 @@ If this is the case, a push notification is sent to the configured smartphone.
 - Verify your e-mail and login [here](https://pushover.net/)
 - Scroll down until you see a table called _Your Application_
 - Create a new application
-- After the successfull creation of a new application you will see a API Token. Copy it.
+- After the successful creation of a new application you will see a API Token. Copy it.
 
 ### Step 3: Install the Node-Red Pushover Node
 
@@ -158,7 +158,7 @@ If this is the case, a push notification is sent to the configured smartphone.
 - Create a new key
 - Copy your API Token into the field _Token_
 - Copy your User Key from the main page of Pushover into the field _User_
-- [optinal] Enter a name of your key into the field name
+- [optional] Enter a name of your key into the field name
 - Save your key
 
 ### Step 5: Test it
@@ -204,8 +204,8 @@ If this is the case, a push notification is sent to the configured smartphone.
     "id": "e9acaa50.e2a9f8",
     "type": "function",
     "z": "cb8a1fee.fc79e",
-    "name": "Controll condition and hysteresis",
-    "func": "const hysteresisMet = flow.get('hysteresisMet25')||false;\n\nlet data = {}\ndata.payload=`Slight overtemperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet25', false);\n    return data\n}\n",
+    "name": "Control condition and hysteresis",
+    "func": "const hysteresisMet = flow.get('hysteresisMet25')||false;\n\nlet data = {}\ndata.payload=`Slight over temperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet25', false);\n    return data\n}\n",
     "outputs": 1,
     "noerr": 0,
     "x": 861.5207366943359,
@@ -304,8 +304,8 @@ If this is the case, a push notification is sent to the configured smartphone.
     "id": "bb4a0aff.247518",
     "type": "function",
     "z": "cb8a1fee.fc79e",
-    "name": "Controll condition and hysteresis",
-    "func": "const hysteresisMet = flow.get('hysteresisMet35')||false;\n\nlet data = {}\ndata.payload=`Slight overtemperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet35', false);\n    return data\n}\n",
+    "name": "Control condition and hysteresis",
+    "func": "const hysteresisMet = flow.get('hysteresisMet35')||false;\n\nlet data = {}\ndata.payload=`Slight over temperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet35', false);\n    return data\n}\n",
     "outputs": 1,
     "noerr": 0,
     "x": 863.017333984375,
@@ -316,8 +316,8 @@ If this is the case, a push notification is sent to the configured smartphone.
     "id": "1b61c824.d21108",
     "type": "function",
     "z": "cb8a1fee.fc79e",
-    "name": "Controll condition and hysteresis",
-    "func": "const hysteresisMet = flow.get('hysteresisMet45')||false;\n\nlet data = {}\ndata.payload=`Slight overtemperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet45', false);\n    return data\n}\n",
+    "name": "Control condition and hysteresis",
+    "func": "const hysteresisMet = flow.get('hysteresisMet45')||false;\n\nlet data = {}\ndata.payload=`Slight over temperature at the motor. (${msg.payload.value} °C)`\ndata.topic=\"M1-A343\"\ndata.priority=-1\n\nif(msg.payload.condition && hysteresisMet){\n    flow.set('hysteresisMet45', false);\n    return data\n}\n",
     "outputs": 1,
     "noerr": 0,
     "x": 861.017333984375,
@@ -370,7 +370,7 @@ In this showcase two io-keys are used to monitor two silos. The sensor readings 
 ### Flow:
 
 ```json
-[{"id":"c46e8f2c.3e845","type":"tab","label":"Silo","disabled":false,"info":""},{"id":"454dd216.7894fc","type":"measurements","z":"c46e8f2c.3e845","name":"","auth":"","device":"device_io-key-357142090031740","sensor":"869876","channel":"357142090031740-AU004-1-1","format":"none","datapoint":"","x":238.0000057220459,"y":650.0000066757202,"wires":[["c60c5431.a41498"]]},{"id":"ab1ceac2.abe4a8","type":"measurements","z":"c46e8f2c.3e845","name":"","auth":"","device":"","format":"none","datapoint":"","x":238.0000057220459,"y":370.0000066757202,"wires":[["48407452.a9a02c"]]},{"id":"cb08964a.e8aa98","type":"comment","z":"c46e8f2c.3e845","name":"Silo 1","info":"","x":208.0000057220459,"y":250.00000667572021,"wires":[]},{"id":"f641eb2c.b50d48","type":"comment","z":"c46e8f2c.3e845","name":"Silo 2","info":"","x":208.0000057220459,"y":530.0000066757202,"wires":[]},{"id":"96f95f57.c97ff","type":"function","z":"c46e8f2c.3e845","name":"Calculate Fill Level","func":"//    Silo\n//    +--+--+\n//    |  |  |\n//    |  + <----+ Distance Sensor\n//    |     |\n//    |     |\n//    +-----+\n//    |-----| <-+ Material\n//    |-----| \n//    +-----+\n\n// Settings\nconst SENSOR_MOUNT_HEIGHT = 2.0; // m\nconst SILO_DIAMETER = 4.0; //m\n\n// Calculations\nconst fillHeight = SENSOR_MOUNT_HEIGHT - msg.payload;\nconst fillLevel = fillHeight * Math.pow(SILO_DIAMETER/2, 2) * 1000; \n\nconst newMsg = { payload: fillLevel};\nreturn newMsg;","outputs":1,"noerr":0,"x":488.0000057220459,"y":450.0000066757202,"wires":[["528bbc25.7324e4"]]},{"id":"48407452.a9a02c","type":"function","z":"c46e8f2c.3e845","name":"Sensor Value to Meters","func":"msg.payload = msg.payload.value / 100;\nreturn msg;","outputs":1,"noerr":0,"x":408.0000057220459,"y":410.0000066757202,"wires":[["96f95f57.c97ff"]]},{"id":"c60c5431.a41498","type":"function","z":"c46e8f2c.3e845","name":"Sensor Value to Meters","func":"msg.payload = msg.payload.value / 1000;\nreturn msg;","outputs":1,"noerr":0,"x":408.0000057220459,"y":690.0000066757202,"wires":[["86e51011.cc09b"]]},{"id":"86e51011.cc09b","type":"function","z":"c46e8f2c.3e845","name":"Calculate Fill Level","func":"//    Silo\n//    +--+--+\n//    |  |  |\n//    |  + <----+ Distance Sensor\n//    |     |\n//    |     |\n//    +-----+\n//    |-----| <-+ Material\n//    |-----| \n//    +-----+\n\n// Settings\nconst SENSOR_MOUNT_HEIGHT = 0.4; // m\nconst SILO_DIAMETER = 3; //m\n\n// Calculations\nconst fillHeight = SENSOR_MOUNT_HEIGHT - msg.payload;\nconst fillLevel = fillHeight * Math.pow(SILO_DIAMETER/2, 2) * 1000; \n\nconst newMsg = { payload: fillLevel};\nreturn newMsg;","outputs":1,"noerr":0,"x":488.0000057220459,"y":730.0000066757202,"wires":[["fa08d5c9.3a7228"]]},{"id":"528bbc25.7324e4","type":"change","z":"c46e8f2c.3e845","name":"","rules":[{"t":"set","p":"Silo1","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":558.0000057220459,"y":490.0000066757202,"wires":[["4c195b31.a320e4"]]},{"id":"4c195b31.a320e4","type":"change","z":"c46e8f2c.3e845","name":"sum","rules":[{"t":"set","p":"payload","pt":"msg","to":"$flowContext('Silo1')+$flowContext('Silo2')","tot":"jsonata"}],"action":"","property":"","from":"","to":"","reg":false,"x":748.0000057220459,"y":630.0000066757202,"wires":[["abc39c3b.f8d04"]]},{"id":"fa08d5c9.3a7228","type":"change","z":"c46e8f2c.3e845","name":"","rules":[{"t":"set","p":"Silo2","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":558.0000057220459,"y":770.0000066757202,"wires":[["4c195b31.a320e4"]]},{"id":"abc39c3b.f8d04","type":"rbe","z":"c46e8f2c.3e845","name":"","func":"rbe","gap":"","start":"","inout":"out","property":"payload","x":788.0000057220459,"y":670.0000066757202,"wires":[["9e398b9b.aacba8"]]},{"id":"8f36a9be.6c5a58","type":"e-mail","z":"c46e8f2c.3e845","server":"","port":"465","secure":true,"name":"","dname":"","x":968.0000057220459,"y":790.0000066757202,"wires":[]},{"id":"a9cc45d.c92a3b8","type":"inject","z":"c46e8f2c.3e845","name":"Inject Test Data: Full","topic":"","payload":"{\"value\": 50}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":248.0000057220459,"y":570.0000066757202,"wires":[["c60c5431.a41498"]]},{"id":"9c81119.bab43f","type":"inject","z":"c46e8f2c.3e845","name":"Inject Test Data: Empty","topic":"","payload":"{\"value\": 400}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":258.0000057220459,"y":610.0000066757202,"wires":[["c60c5431.a41498"]]},{"id":"33e17062.3767a","type":"inject","z":"c46e8f2c.3e845","name":"Inject Test Data: Full","topic":"","payload":"{\"value\": 25}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":248.0000057220459,"y":290.0000066757202,"wires":[["48407452.a9a02c"]]},{"id":"607c50b5.49dd5","type":"inject","z":"c46e8f2c.3e845","name":"Inject Test Data: Empty","topic":"","payload":"{\"value\":195}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":258.0000057220459,"y":330.0000066757202,"wires":[["48407452.a9a02c"]]},{"id":"9e398b9b.aacba8","type":"function","z":"c46e8f2c.3e845","name":"Check if Empty","func":"// Settings\nconst THRESHOLD = 500.0; // 500 liters is threashold for email\nconst HYSTERESIS = 10.0; // hysteresis in percent\nconst STORE = \"mailHystersisOk\";\n\n// Hysteresis\nif (msg.payload > THRESHOLD * (1+HYSTERESIS/100)) {\n    context.set(STORE, true);\n} \n// Compare if empty\nif (msg.payload <= THRESHOLD && context.get(STORE)) {\n    context.set(STORE, false)\n    return msg;\n} else {\n    return null;\n}\n\n\n\n","outputs":1,"noerr":0,"x":858.0000057220459,"y":710.0000066757202,"wires":[["23e3b1bc.28476e"]]},{"id":"23e3b1bc.28476e","type":"function","z":"c46e8f2c.3e845","name":"Mail","func":"const mail = {};\n\nmail.topic = \"New Order\"\nmail.payload = `Dear Mr. Musterman,\n\ni would like to order a new batch of ${Math.round(2000 - msg.payload)} liters to our \nMunich location.\n\nBest regards,\nAnna Accounting\n`;\nreturn mail;","outputs":1,"noerr":0,"x":948.0000057220459,"y":750.0000066757202,"wires":[["8f36a9be.6c5a58"]]},{"id":"f98d3488.b51358","type":"comment","z":"c46e8f2c.3e845","name":"Flow Description","info":"In this example two io-keys are used to monitor\ntwo silos. The sensor readings are converted to\nliters and the flow adds up the fill levels of both\nsilos. If the total material is too low the flow\nsends an email to notify the supplier.","x":232.16669273376465,"y":152.66667413711548,"wires":[
+[{"id":"c46e8f2c.3e845","type":"tab","label":"Silo","disabled":false,"info":""},{"id":"454dd216.7894fc","type":"measurements","z":"c46e8f2c.3e845","name":"","auth":"","device":"device_io-key-357142090031740","sensor":"869876","channel":"357142090031740-AU004-1-1","format":"none","datapoint":"","x":238.0000057220459,"y":650.0000066757202,"wires":[["c60c5431.a41498"]]},{"id":"ab1ceac2.abe4a8","type":"measurements","z":"c46e8f2c.3e845","name":"","auth":"","device":"","format":"none","datapoint":"","x":238.0000057220459,"y":370.0000066757202,"wires":[["48407452.a9a02c"]]},{"id":"cb08964a.e8aa98","type":"comment","z":"c46e8f2c.3e845","name":"Silo 1","info":"","x":208.0000057220459,"y":250.00000667572021,"wires":[]},{"id":"f641eb2c.b50d48","type":"comment","z":"c46e8f2c.3e845","name":"Silo 2","info":"","x":208.0000057220459,"y":530.0000066757202,"wires":[]},{"id":"96f95f57.c97ff","type":"function","z":"c46e8f2c.3e845","name":"Calculate Fill Level","func":"//    Silo\n//    +--+--+\n//    |  |  |\n//    |  + <----+ Distance Sensor\n//    |     |\n//    |     |\n//    +-----+\n//    |-----| <-+ Material\n//    |-----| \n//    +-----+\n\n// Settings\nconst SENSOR_MOUNT_HEIGHT = 2.0; // m\nconst SILO_DIAMETER = 4.0; //m\n\n// Calculations\nconst fillHeight = SENSOR_MOUNT_HEIGHT - msg.payload;\nconst fillLevel = fillHeight * Math.pow(SILO_DIAMETER/2, 2) * 1000; \n\nconst newMsg = { payload: fillLevel};\nreturn newMsg;","outputs":1,"noerr":0,"x":488.0000057220459,"y":450.0000066757202,"wires":[["528bbc25.7324e4"]]},{"id":"48407452.a9a02c","type":"function","z":"c46e8f2c.3e845","name":"Sensor Value to Meters","func":"msg.payload = msg.payload.value / 100;\nreturn msg;","outputs":1,"noerr":0,"x":408.0000057220459,"y":410.0000066757202,"wires":[["96f95f57.c97ff"]]},{"id":"c60c5431.a41498","type":"function","z":"c46e8f2c.3e845","name":"Sensor Value to Meters","func":"msg.payload = msg.payload.value / 1000;\nreturn msg;","outputs":1,"noerr":0,"x":408.0000057220459,"y":690.0000066757202,"wires":[["86e51011.cc09b"]]},{"id":"86e51011.cc09b","type":"function","z":"c46e8f2c.3e845","name":"Calculate Fill Level","func":"//    Silo\n//    +--+--+\n//    |  |  |\n//    |  + <----+ Distance Sensor\n//    |     |\n//    |     |\n//    +-----+\n//    |-----| <-+ Material\n//    |-----| \n//    +-----+\n\n// Settings\nconst SENSOR_MOUNT_HEIGHT = 0.4; // m\nconst SILO_DIAMETER = 3; //m\n\n// Calculations\nconst fillHeight = SENSOR_MOUNT_HEIGHT - msg.payload;\nconst fillLevel = fillHeight * Math.pow(SILO_DIAMETER/2, 2) * 1000; \n\nconst newMsg = { payload: fillLevel};\nreturn newMsg;","outputs":1,"noerr":0,"x":488.0000057220459,"y":730.0000066757202,"wires":[["fa08d5c9.3a7228"]]},{"id":"528bbc25.7324e4","type":"change","z":"c46e8f2c.3e845","name":"","rules":[{"t":"set","p":"Silo1","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":558.0000057220459,"y":490.0000066757202,"wires":[["4c195b31.a320e4"]]},{"id":"4c195b31.a320e4","type":"change","z":"c46e8f2c.3e845","name":"sum","rules":[{"t":"set","p":"payload","pt":"msg","to":"$flowContext('Silo1')+$flowContext('Silo2')","tot":"jsonata"}],"action":"","property":"","from":"","to":"","reg":false,"x":748.0000057220459,"y":630.0000066757202,"wires":[["abc39c3b.f8d04"]]},{"id":"fa08d5c9.3a7228","type":"change","z":"c46e8f2c.3e845","name":"","rules":[{"t":"set","p":"Silo2","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":558.0000057220459,"y":770.0000066757202,"wires":[["4c195b31.a320e4"]]},{"id":"abc39c3b.f8d04","type":"rbe","z":"c46e8f2c.3e845","name":"","func":"rbe","gap":"","start":"","inout":"out","property":"payload","x":788.0000057220459,"y":670.0000066757202,"wires":[["9e398b9b.aacba8"]]},{"id":"8f36a9be.6c5a58","type":"e-mail","z":"c46e8f2c.3e845","server":"","port":"465","secure":true,"name":"","dname":"","x":968.0000057220459,"y":790.0000066757202,"wires":[]},{"id":"a9cc45d.c92a3b8","type":"inject","z":"c46e8f2c.3e845","name":"Inject Test Data: Full","topic":"","payload":"{\"value\": 50}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":248.0000057220459,"y":570.0000066757202,"wires":[["c60c5431.a41498"]]},{"id":"9c81119.bab43f","type":"inject","z":"c46e8f2c.3e845","name":"Inject Test Data: Empty","topic":"","payload":"{\"value\": 400}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":258.0000057220459,"y":610.0000066757202,"wires":[["c60c5431.a41498"]]},{"id":"33e17062.3767a","type":"inject","z":"c46e8f2c.3e845","name":"Inject Test Data: Full","topic":"","payload":"{\"value\": 25}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":248.0000057220459,"y":290.0000066757202,"wires":[["48407452.a9a02c"]]},{"id":"607c50b5.49dd5","type":"inject","z":"c46e8f2c.3e845","name":"Inject Test Data: Empty","topic":"","payload":"{\"value\":195}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":258.0000057220459,"y":330.0000066757202,"wires":[["48407452.a9a02c"]]},{"id":"9e398b9b.aacba8","type":"function","z":"c46e8f2c.3e845","name":"Check if Empty","func":"// Settings\nconst THRESHOLD = 500.0; // 500 liters is threshold for email\nconst HYSTERESIS = 10.0; // hysteresis in percent\nconst STORE = \"mailHysteresisOk\";\n\n// Hysteresis\nif (msg.payload > THRESHOLD * (1+HYSTERESIS/100)) {\n    context.set(STORE, true);\n} \n// Compare if empty\nif (msg.payload <= THRESHOLD && context.get(STORE)) {\n    context.set(STORE, false)\n    return msg;\n} else {\n    return null;\n}\n\n\n\n","outputs":1,"noerr":0,"x":858.0000057220459,"y":710.0000066757202,"wires":[["23e3b1bc.28476e"]]},{"id":"23e3b1bc.28476e","type":"function","z":"c46e8f2c.3e845","name":"Mail","func":"const mail = {};\n\nmail.topic = \"New Order\"\nmail.payload = `Dear Mr. Musterman,\n\ni would like to order a new batch of ${Math.round(2000 - msg.payload)} liters to our \nMunich location.\n\nBest regards,\nAnna Accounting\n`;\nreturn mail;","outputs":1,"noerr":0,"x":948.0000057220459,"y":750.0000066757202,"wires":[["8f36a9be.6c5a58"]]},{"id":"f98d3488.b51358","type":"comment","z":"c46e8f2c.3e845","name":"Flow Description","info":"In this example two io-keys are used to monitor\ntwo silos. The sensor readings are converted to\nliters and the flow adds up the fill levels of both\nsilos. If the total material is too low the flow\nsends an email to notify the supplier.","x":232.16669273376465,"y":152.66667413711548,"wires":[
 ```
 
 ## Microsoft Azure Communication
@@ -463,7 +463,7 @@ With this flow sensor data can be directly published via MQTT to an AWS IOT Brok
 - Create your AWS Thing with a suitable policy
 - Download all required certifications and keys
 
-### Step 2: Configurate the MQTT node
+### Step 2: Configure the MQTT node
 
 - Select the _mqtt_ node
 - Add a new server
@@ -526,9 +526,9 @@ With this flow sensor data can be directly published via MQTT to an AWS IOT Brok
 
 ## Amazon Alexa Example
 
-With this flow you can activate or deactivate the data transfer to a cloud platform (here mindsphere) via alexa spoken command.
+With this flow you can activate or deactivate the data transfer to a cloud platform (here MindSphere) via Alexa spoken command.
 This is an small example how to interact with Alexa in your Node-RED flow.
-For deeper functions alexa skills are needed. You find more information to this topic [here](https://developer.amazon.com/de/alexa-skills-kit/?sc_category=paid&sc_channel=sem&sc_campaign=SEM-GO%7CNon-Brand%7CAll%7CREG%7CProfessional_Developer%7CEvergreen%7CIT%7CItalian%7CText%7Ccoding_language&sc_publisher=GO&sc_content=content&sc_detail=322783149505&sc_funnel=convert&sc_country=DE&sc_keyword=alexa%20skills%20entwickeln&sc_place=&sc_trackingcode=e&sc_segment=build_alexa_skill_e&sc_medium=paid%7Csem%7CSEM-GO%7CNon-Brand%7CAll%7CREG%7CProfessional_Developer%7CEvergreen%7CIT%7CItalian%7CText%7Ccoding_language%7CGO%7Ccontent%7C322783149505%7Cconvert%7CDE%7Calexa%20skills%20entwickeln%7C%7Ce%7Cbuild_alexa_skill_e)
+For deeper functions Alexa skills are needed. You find more information to this topic [here](https://developer.amazon.com/de/alexa-skills-kit/?sc_category=paid&sc_channel=sem&sc_campaign=SEM-GO%7CNon-Brand%7CAll%7CREG%7CProfessional_Developer%7CEvergreen%7CIT%7CItalian%7CText%7Ccoding_language&sc_publisher=GO&sc_content=content&sc_detail=322783149505&sc_funnel=convert&sc_country=DE&sc_keyword=alexa%20skills%20entwickeln&sc_place=&sc_trackingcode=e&sc_segment=build_alexa_skill_e&sc_medium=paid%7Csem%7CSEM-GO%7CNon-Brand%7CAll%7CREG%7CProfessional_Developer%7CEvergreen%7CIT%7CItalian%7CText%7Ccoding_language%7CGO%7Ccontent%7C322783149505%7Cconvert%7CDE%7Calexa%20skills%20entwickeln%7C%7Ce%7Cbuild_alexa_skill_e)
 
 ## Getting Started
 
@@ -555,7 +555,7 @@ For deeper functions alexa skills are needed. You find more information to this 
   {
     "id": "8f390e05.0dcbf",
     "type": "tab",
-    "label": "Alexa/Mindsphere",
+    "label": "Alexa/MindSphere",
     "disabled": false,
     "info": ""
   },
@@ -620,7 +620,7 @@ For deeper functions alexa skills are needed. You find more information to this 
     "id": "dd6804c2.19fff8",
     "type": "function",
     "z": "8f390e05.0dcbf",
-    "name": "Controll",
+    "name": "Control",
     "func": "let dataTransfer = flow.get('dataTransfer')||false;\n\nif(dataTransfer === true){\n    return msg\n}\n\n",
     "outputs": 1,
     "noerr": 0,
@@ -633,7 +633,7 @@ For deeper functions alexa skills are needed. You find more information to this 
     "type": "comment",
     "z": "8f390e05.0dcbf",
     "name": "Flow Description",
-    "info": "With this flow you can activate or deactivate\nthe data transfer to a cloud platform (here \nmindsphere) via alexa spoken command.",
+    "info": "With this flow you can activate or deactivate\nthe data transfer to a cloud platform (here \nMindSphere) via alexa spoken command.",
     "x": 230.01734924316406,
     "y": 239.0104465484619,
     "wires": []

@@ -49,6 +49,7 @@ class Credentials {
           const url = response.data.self;
           const host = url.split('/')[2];
           const id = host.split('.')[0];
+
           resolve(id);
         })
         .catch(e => {
