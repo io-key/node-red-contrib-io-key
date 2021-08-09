@@ -46,7 +46,9 @@ class Credentials {
       axios
         .get(`https://${hostname}/tenant/loginOptions`, {})
         .then(response => {
-          const url = response.data.self;
+          const options = response.data.loginOptions[0];
+          const url = options.self;
+
           const host = url.split('/')[2];
           const id = host.split('.')[0];
 
