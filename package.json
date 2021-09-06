@@ -37,7 +37,7 @@
     "should": "^13.2.3"
   },
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.21.3",
     "path": "^0.12.7"
   },
   "jest": {
