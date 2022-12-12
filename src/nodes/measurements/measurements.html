@@ -8,6 +8,7 @@
         value: { tenant: '', username: '', password: '' },
         type: 'tenant-config',
       },
+      connection: {value: 'websocket'},
       device: { value: '' },
       sensor: { value: '' },
       channel: { value: '' },
@@ -56,6 +57,14 @@
   <div class="form-row">
     <label for="node-input-auth"> Authentication</label>
     <input id="node-input-auth" style="width:70%;">
+  </div>
+  <div class="form-row">
+    <label for="node-input-connection"> Connection</label>
+    <select id="node-input-connection" style="width:70%;">
+      <option value="longPolling">Long Polling</option>
+      <option value="websocket" selected="selected">Websocket</option>
+    </select>
+  </select>
   </div>
   <div class="form-row">
     <label for="node-input-iokey"> io-key</label>

@@ -185,6 +185,16 @@ function UI(node) {
   });
 
   /**
+   * TODO: Handle change event for connection also.
+   * Add change event handler to node-input-connection
+   */
+   $('#node-input-connection').on('change', function(event) {
+    var value = $('#node-input-connection option:selected').val();
+    // Connect with new selected connection.
+    // addIokeyOptions();
+    });
+
+  /**
    * Adds an on change handler to the io-key select
    */
   $('#node-input-iokey').on('change', function(event) {

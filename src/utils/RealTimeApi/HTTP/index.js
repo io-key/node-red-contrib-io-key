@@ -1,8 +1,8 @@
 const axios = require('axios');
-const Credentials = require('../Credentials');
-const Measurement = require('../Measurement');
-const Alarm = require('../Alarm');
-const Event = require('../Event');
+const Credentials = require('../../Credentials');
+const Measurement = require('../../Measurement');
+const Alarm = require('../../Alarm');
+const Event = require('../../Event');
 
 /**
  * Connects to cumulocity's realtime-notification API

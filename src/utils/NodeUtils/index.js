@@ -1,4 +1,5 @@
-const RealTime = require('../../utils/RealTime');
+const RealTime = require('../RealTimeApi/HTTP');
+const RealTimeWs = require('../RealTimeApi/Websocket');
 
 class NodeUtils {
   static configureIokeyNode(RED, node, config) {
@@ -10,7 +11,12 @@ class NodeUtils {
       });
     } else {
       const auth = RED.nodes.getNode(config.auth);
-      const realTime = new RealTime(node, config, auth);
+      let realTime = null;
+      if (config.connection === 'longPolling') {
+        realTime = new RealTime(node, config, auth);
+      } else {
+        realTime = new RealTimeWs(node, config, auth);
+      }
       realTime.start();
     }
   }
