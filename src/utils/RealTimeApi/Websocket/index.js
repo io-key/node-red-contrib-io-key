@@ -1,10 +1,11 @@
-const axios = require('axios');
 const uuid = require('uuid');
 const ws = require('ws');
 const Credentials = require('../../Credentials');
 const Measurement = require('../../Measurement');
 const Alarm = require('../../Alarm');
 const Event = require('../../Event');
+const fetch = (...args) =>
+  import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 /**
  * Connects to cumulocity's realtime-notification API
@@ -19,7 +20,7 @@ class RealTimeWs {
     this.encodedCredentials = '';
     this.jwt = null;
     this.subscriptionName = 'nodeRed' + uuid.v4().replace(/-/g, '');
-    this.clientId = 'node-red-' + uuid.v4();
+    this.clientId = 'nodeRed' + uuid.v4().replace(/-/g, '');
     this.subResponse = null;
 
     this.subscriptionNameID = null;
@@ -57,7 +58,7 @@ class RealTimeWs {
       this.setStatus(this.STATUS_TYPES.MISSING_CREDENTIALS);
       return;
     }
-    console.log(this.config);
+    console.log('Config:', this.config);
 
     this.setStatus(this.STATUS_TYPES.CONNECTING);
 
@@ -69,12 +70,16 @@ class RealTimeWs {
         return this.getToken();
       })
       .then(() => {
-        this.connected = true;
-        this.setStatus(this.STATUS_TYPES.CONNECTED);
-        return
-        // \return this.startNewConnection();
+        setTimeout(() => {
+          console.log('[info] Successfully connected!');
+          this.connected = true;
+          this.setStatus(this.STATUS_TYPES.CONNECTED);
+
+          return this.startNewConnection();
+        }, '1000');
       })
       .catch(e => {
+        console.log('[error] start(): ', e);
         if (e.error) {
           if (
             e.error === this.ERROR_TYPES.HANDSHAKE_FAILED ||
@@ -122,35 +127,47 @@ class RealTimeWs {
     const url = `https://${this.auth.tenant}/notification2/token`;
     const auth = `Basic ${this.encodedCredentials}`;
     return new Promise((resolve, reject) => {
-      axios({
-        method: 'post',
-        url: url,
+      const reqPayload = {
+        subscriber: this.clientId,
+        subscription: this.subscriptionName,
+        expiresInMinutes: 1440
+      };
+
+      fetch(url, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
           Authorization: auth
         },
-        data: [
-          {
-            subscriber: this.clientId,
-            subscription: this.subscriptionName,
-            expiresInMinutes: 1440
-          }
-        ]
+        body: JSON.stringify(reqPayload)
       })
         .then(res => {
-          const data = res.data[0];
+          res
+            .json()
+            .then(response => {
+              const token = response.token;
 
-          if (data && data.token.length !== 0) {
-            this.jwt = data.token;
-            return resolve(this.jwt);
-          } else {
-            this.setStatus(this.STATUS_TYPES.CONNECTION_FAILED);
-            return reject({ error: 'handshake_failed' });
-          }
+              if (token && token.length !== 0) {
+                console.log('[info] Successfully fetched token');
+                this.jwt = token;
+                return resolve(this.jwt);
+              } else {
+                this.setStatus(this.STATUS_TYPES.CONNECTION_FAILED);
+                return reject({ error: 'handshake_failed' });
+              }
+            })
+            .catch(e => {
+              console.log('[error]: Error fetching token', e);
+              this.setStatus(this.STATUS_TYPES.CONNECTION_FAILED);
+              if (e && e.response && e.response.status === 401) {
+                this.setStatus(this.STATUS_TYPES.INVALID_CREDENTIALS);
+              }
+              reject(e);
+            });
         })
         .catch(e => {
-          console.log("Markus" + JSON.stringify(e.response.status))
+          console.log('[error]: Error fetching token', e);
           this.setStatus(this.STATUS_TYPES.CONNECTION_FAILED);
           if (e && e.response && e.response.status === 401) {
             this.setStatus(this.STATUS_TYPES.INVALID_CREDENTIALS);
@@ -180,34 +197,52 @@ class RealTimeWs {
         context: 'mo',
         subscription: this.subscriptionName,
         subscriptionFilter: {
-          apis: [
-            'measurements'
-          ]
+          apis: [this.node.type], // measurements
+          typeFilter:
+            this.node.type === 'measurements' ? this.config.channel : undefined
         }
       };
-      return axios({
-        method: 'post',
-        url: `https://${this.auth.tenant}/notification2/subscriptions`,
+
+      return fetch(`https://${this.auth.tenant}/notification2/subscriptions`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Accept: 'application/json',
+          Accept: 'application/vnd.com.nsn.cumulocity.subscription+json',
           Authorization: `Basic ${this.encodedCredentials}`
         },
-        data: reqPayload
+        body: JSON.stringify(reqPayload)
       })
-      .then(res => {
-          const data = res.data[0];
+        .then(res => {
+          res
+            .json()
+            .then(response => {
+              const data = response;
+              console.log(response);
 
-          if (data && data.id.length !== 0) {
-            this.subResponse = data;
-          } else {
-            reject(this.handleSubscriptionFail(data));
-          }
+              if (data && data.id.length !== 0) {
+                console.log('[info] Successfully created Subscription');
+                this.subResponse = data;
+              } else {
+                reject(this.handleSubscriptionFail(data));
+              }
+              resolve();
+            })
+            .catch(e => {
+              console.log('[error] Error creating subscription', e);
+              const errMsg = this.handleSubscriptionFail({
+                error: [e.response?.status || 'An unexpected error occurred.']
+              });
+              this.setStatus(errMsg.error);
+              reject(e);
+            });
+
+          resolve();
         })
-        .catch((e) => {
-          const errMsg = this.handleSubscriptionFail({error: [
-            e.response.status
-          ]})
+        .catch(e => {
+          console.log('[error] Error creating subscription"', e);
+          const errMsg = this.handleSubscriptionFail({
+            error: ['An unexpected error occurred.']
+          });
           this.setStatus(errMsg.error);
           reject(e);
         });
@@ -232,10 +267,11 @@ class RealTimeWs {
       throw new Error(
         'Websocket connection failed because of missing information'
       );
-    this.sws = new ws.WebSocketServer(
+    this.sws = new ws.WebSocket(
       `wss://${this.auth.tenant}/notification2/consumer/?token=${this.jwt}`
     );
-    sws.on('error', () => {
+
+    this.sws.on('error', () => {
       this.connect();
     });
     this.sws.on('open', () => {
@@ -243,7 +279,6 @@ class RealTimeWs {
         this.handleNewMessage(data);
       });
     });
-
   }
 
   /**
@@ -264,17 +299,15 @@ class RealTimeWs {
    * Handles a connection fail
    * @param  {string} data a realtime-notification
    */
-  handleNewMessage(data) {
-    if (data.length === 0) {
-      return;
-    }
-    console.log(data);
+  handleNewMessage(rawData) {
+    const data = Buffer.from(rawData, 'base64').toString();
 
     // First 3 Lines are header
-    const [header, body ] = data.split('\n\n');
+    const [header, body] = data.split('\n\n');
+
     // encoded binary 64 bit value, notification type and source, CREATE | UPDATE | DELETE | ... must be CREATE for measurements
     const [msgID, notificationDesc, action] = header.split('\n');
-    // notificationType event, measurement, alarm or managed object. 
+    // notificationType event, measurement, alarm or managed object.
     const [tenantID, notificationType, source] = notificationDesc.split('/');
     /*
     {
@@ -292,30 +325,26 @@ class RealTimeWs {
     "type": <>
     }
     */
-    const parsedBody = JSON.parse(body);
-    const measurements = Object.fromEntries(Object.entries(parsedBody).filter(([prop, val]) => !['time'].includes(prop)));
+    const msg = JSON.parse(body);
 
     // ACK receipt
     this.sws.send(msgID.trim());
-  
-    // parsedBody[this.node.type];
-    const messages = [];
 
-    messages.forEach(msg => {
-        switch (this.node.type) {
-          case 'measurements':
-            this.processMeasurement(msg);
-            break;
-          case 'alarms':
-            this.processAlarm(msg);
-            break;
-          case 'events':
-            this.processEvent(msg);
-            break;
-          default:
-            break;
-        }
-    });
+    // parsedBody[this.node.type];
+
+    switch (this.node.type) {
+      case 'measurements':
+        this.processMeasurement(msg);
+        break;
+      case 'alarms':
+        this.processAlarm(msg);
+        break;
+      case 'events':
+        this.processEvent(msg);
+        break;
+      default:
+        break;
+    }
   }
 
   /**
@@ -340,11 +369,9 @@ class RealTimeWs {
    * @param  {object} msg a realtime-notification
    */
   processMeasurement(msg) {
-    const { data } = msg.data;
-
     // only process messages from the selected channel
-    if (data.type === this.config.channel) {
-      const measurement = new Measurement(data, this.config.datapoint);
+    if (msg.type === this.config.channel) {
+      const measurement = new Measurement(msg, this.config.datapoint);
 
       this.node.send(measurement.getMsg(this.config.format));
     }
@@ -355,11 +382,15 @@ class RealTimeWs {
    * @param  {object} msg a realtime-notification
    */
   processAlarm(msg) {
-    const { data } = msg;
+    console.log('ALARM MSG', msg);
+
+    const formattedMsg = {
+      data: msg
+    };
 
     // only process messages from the selected channel
-    if (data.data.type.includes(this.config.channel)) {
-      const alarm = new Alarm(data);
+    if (msg.type.includes(this.config.channel)) {
+      const alarm = new Alarm(formattedMsg);
 
       this.node.send(alarm.getMsg(this.config.format));
     }

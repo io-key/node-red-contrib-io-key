@@ -6,12 +6,13 @@
       name: { value: '' },
       auth: {
         value: { tenant: '', username: '', password: '' },
-        type: 'tenant-config',
+        type: 'tenant-config'
       },
       device: { value: '' },
       sensor: { value: '' },
       channel: { value: '' },
       format: { value: 'none' },
+      connection: { value: 'websocket' }
     },
     color: '#356a96',
     inputs: 0,
@@ -36,11 +37,13 @@
       var device = $('#node-input-iokey option:selected').val();
       var sensor = $('#node-input-sensor option:selected').val();
       var channel = $('#node-input-channel option:selected').val();
+      var connection = $('#node-input-connection option:selected').val();
 
+      this.connection = connection;
       this.device = device;
       this.sensor = sensor;
       this.channel = channel;
-    },
+    }
   });
 </script>
 
@@ -76,6 +79,13 @@
         <option value="mdsp">MindSphere</option>
         <option value="c8y">Cumulocity</option>
         <option value="ppmp">PPMP</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-format"> Connection Type</label>
+    <select id="node-input-connection" style="width:70%;">
+        <option value="longPolling">Long Polling</option>
+        <option value="websocket">Websocket</option>
     </select>
   </div>
 </script>
