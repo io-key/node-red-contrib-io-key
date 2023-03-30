@@ -1,10 +1,12 @@
 {
   "name": "node-red-contrib-io-key",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "A collection of nodes to access the io-key cloud with Node-RED.",
   "scripts": {
     "test": "jest --forceExit --detectOpenHandles",
-    "coverage": "jest --coverage --forceExit --detectOpenHandles"
+    "coverage": "jest --coverage --forceExit --detectOpenHandles",
+    "install:nodes": "mkdir -p .node-red && cd .node-red && npm install ../",
+    "start": "rm -rf .node-red/node_modules/node-red-contrib-io-key/src && cp -r src .node-red/node_modules/node-red-contrib-io-key/src && docker run -it -p 1880:1880 --mount type=bind,source=$(pwd)/.node-red,target=/data --rm --name node-red nodered/node-red"
   },
   "repository": {
     "type": "git",

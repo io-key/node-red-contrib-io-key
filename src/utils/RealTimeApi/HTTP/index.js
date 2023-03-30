@@ -364,9 +364,12 @@ class RealTime {
     const { data } = msg.data;
 
     // only process messages from the selected channel
-    if (data.type === this.config.channel) {
-      const measurement = new Measurement(data, this.config.datapoint);
-
+    if (Object.keys(data).some(key => key === this.config.channel)) {
+      const measurement = new Measurement(
+        data,
+        this.config.datapoint,
+        this.config.channel
+      );
       this.node.send(measurement.getMsg(this.config.format));
     }
   }

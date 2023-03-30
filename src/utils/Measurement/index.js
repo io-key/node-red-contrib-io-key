@@ -2,7 +2,8 @@
  * Represents a measurement
  */
 class Measurement {
-  constructor(data, dataPointId) {
+  constructor(data, dataPointId, channel) {
+    this.channel = channel;
     this.dataPointId = dataPointId;
     this.formatDefault(data);
   }
@@ -41,11 +42,12 @@ class Measurement {
   formatDefault(data) {
     const { type, time } = data;
     const source = data.source.id;
-    const seriesData = data[type];
-    const series = Object.keys(seriesData)[0];
-    const { value, unit } = seriesData[series];
+    const seriesData = data[this.channel];
+    const { value, unit } = seriesData[type];
 
-    this.msg = { payload: { type, time, series, value, unit, source } };
+    this.msg = {
+      payload: { type: this.channel, time, series: type, value, unit, source }
+    };
   }
 
   /**

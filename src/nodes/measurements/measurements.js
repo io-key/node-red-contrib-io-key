@@ -1,4 +1,4 @@
-module.exports = function(RED) {
+module.exports = function (RED) {
   const NodeUtils = require('../../utils/NodeUtils');
 
   function MeasurementsNode(config) {
