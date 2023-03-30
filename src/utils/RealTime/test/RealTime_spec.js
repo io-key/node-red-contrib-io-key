@@ -19,7 +19,7 @@ const node = {
 const config = {
   iokey: 'iokey1',
   sensor: '1234',
-  channel: '123456789012345-AL002-1-1'
+  channel: 'AT001-1'
 };
 const auth = {
   tenant: 'tenant.cumulocity.com',
@@ -219,11 +219,11 @@ describe('Class Realtime', () => {
 
     expect(realTime.node.send).toHaveBeenCalledWith({
       payload: {
-        type: '123456789012345-AL002-1-1',
-        time: '2019-07-29T09:32:28.187Z',
-        series: 'Series-837-39',
-        value: 65,
-        unit: null,
+        type: 'AT001-1',
+        time: '2023-03-30T11:22:27.528Z',
+        series: 'Series-837-6',
+        value: 24,
+        unit: '°C',
         source: '1234'
       }
     });

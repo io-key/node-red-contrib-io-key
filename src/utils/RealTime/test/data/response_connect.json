@@ -3,22 +3,18 @@
     "data": {
       "realtimeAction": "CREATE",
       "data": {
-        "123456789012345-AL002-1-1": {
-          "Series-837-39": {
-            "unit": null,
-            "value": 65
-          }
-        },
-        "self": "http://tenant.cumulocity.com/measurement/measurements/864383",
-        "time": "2019-07-29T09:32:28.187Z",
-        "id": "864383",
+        "AT001-1": { "Series-837-6": { "unit": "°C", "value": 24 } },
+        "self": "http://t1451181579.cumulocity.com/measurement/measurements/1624025",
+        "time": "2023-03-30T11:22:27.528Z",
+        "id": "1624025",
         "source": {
-          "self": "http://tenant.cumulocity.com/inventory/managedObjects/1224",
+          "self": "http://t1451181579.cumulocity.com/inventory/managedObjects/1207342",
           "id": "1234"
         },
-        "type": "123456789012345-AL002-1-1"
+        "type": "Series-837-6"
       }
     },
+    "id": "8318391",
     "channel": "/measurements/1224"
   },
   {
