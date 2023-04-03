@@ -28,7 +28,11 @@ class Credentials {
    * @param  {string} object.username the user's name
    * @param  {string} object.password the user's password
    */
-  static validateCredentials({ tenant, username, password }) {
+  static validateCredentials(auth) {
+    if (auth === null) return false;
+
+    const { tenant, username, password } = auth;
+
     if (typeof tenant !== 'string' || tenant.length === 0) return false;
     if (tenant.split('.').length !== 3) return false;
     if (typeof username !== 'string' || username.length === 0) return false;

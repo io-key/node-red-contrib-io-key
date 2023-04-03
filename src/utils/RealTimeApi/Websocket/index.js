@@ -1,5 +1,5 @@
 const uuid = require('uuid');
-const ws = require('ws');
+const WebSocket = require('ws');
 const Credentials = require('../../Credentials');
 const Measurement = require('../../Measurement');
 const Alarm = require('../../Alarm');
@@ -16,16 +16,24 @@ class RealTimeWs {
     this.config = config;
     this.auth = auth;
     this.tenantId = '';
-    this.credentials = new Credentials(auth);
     this.encodedCredentials = '';
     this.jwt = null;
     this.subscriptionName = 'nodeRed' + uuid.v4().replace(/-/g, '');
     this.clientId = 'nodeRed' + uuid.v4().replace(/-/g, '');
     this.subResponse = null;
+    this.pingTimeout;
+    this.tokenExpiresIn = 10; // max 1440
+    this.tokenExpired = false;
+    this.wsTimeUntilTimeout = 30000;
+    this.baseReconnectDelay = 10000;
+    this.retryCount = 0;
 
     this.subscriptionNameID = null;
     this.connected = false;
     this.sws = null;
+    this.reconnectTimeout = null;
+
+    this.setCredentials(auth);
 
     /**
      * Constants to describe all status types of the node
@@ -51,6 +59,16 @@ class RealTimeWs {
   }
 
   /**
+   * Set credentials if existing
+   * @param {*} auth
+   */
+  setCredentials(auth) {
+    if (auth !== null) {
+      this.credentials = new Credentials(auth);
+    }
+  }
+
+  /**
    * Starts a session, subscribe to a channel and then connects to receive data
    */
   start() {
@@ -58,7 +76,6 @@ class RealTimeWs {
       this.setStatus(this.STATUS_TYPES.MISSING_CREDENTIALS);
       return;
     }
-    console.log('Config:', this.config);
 
     this.setStatus(this.STATUS_TYPES.CONNECTING);
 
@@ -79,7 +96,6 @@ class RealTimeWs {
         }, '1000');
       })
       .catch(e => {
-        console.log('[error] start(): ', e);
         if (e.error) {
           if (
             e.error === this.ERROR_TYPES.HANDSHAKE_FAILED ||
@@ -97,6 +113,10 @@ class RealTimeWs {
           return;
         }
       });
+  }
+
+  handleSessionStartError() {
+    //TODO
   }
 
   /**
@@ -130,7 +150,7 @@ class RealTimeWs {
       const reqPayload = {
         subscriber: this.clientId,
         subscription: this.subscriptionName,
-        expiresInMinutes: 1440
+        expiresInMinutes: this.tokenExpiresIn
       };
 
       fetch(url, {
@@ -149,11 +169,22 @@ class RealTimeWs {
               const token = response.token;
 
               if (token && token.length !== 0) {
-                console.log('[info] Successfully fetched token');
+                console.log(
+                  `[info] Successfully fetched token (Code: ${res.status})`
+                );
                 this.jwt = token;
                 return resolve(this.jwt);
               } else {
-                this.setStatus(this.STATUS_TYPES.CONNECTION_FAILED);
+                console.log(
+                  `[info] Failed to fetch token (Code: ${res.status})`
+                );
+
+                if (res.status === 403) {
+                  this.setStatus(this.STATUS_TYPES.INVALID_CREDENTIALS);
+                } else {
+                  this.setStatus(this.STATUS_TYPES.CONNECTION_FAILED);
+                }
+
                 return reject({ error: 'handshake_failed' });
               }
             })
@@ -197,9 +228,9 @@ class RealTimeWs {
         context: 'mo',
         subscription: this.subscriptionName,
         subscriptionFilter: {
-          apis: [this.node.type], // measurements
-          typeFilter:
-            this.node.type === 'measurements' ? this.config.channel : undefined
+          apis: [this.node.type] // measurements
+          // typeFilter:
+          //   this.node.type === 'measurements' ? this.config.channel : undefined
         }
       };
 
@@ -217,9 +248,8 @@ class RealTimeWs {
             .json()
             .then(response => {
               const data = response;
-              console.log(response);
 
-              if (data && data.id.length !== 0) {
+              if (data?.id?.length !== 0) {
                 console.log('[info] Successfully created Subscription');
                 this.subResponse = data;
               } else {
@@ -258,24 +288,90 @@ class RealTimeWs {
     this.connect();
   }
 
+  getReconnectDelay() {
+    return (
+      this.baseReconnectDelay *
+      (Math.min(this.retryCount, 5) * Math.min(this.retryCount, 5))
+    );
+  }
+
   /**
    * A method to connect to the session
    * On success, the channel will be added to the session. Now you can connect to the session to receive notifications
    */
   connect() {
-    if (!this.jwt || !this.auth.tenant)
+    if (this.tokenExpired) return;
+
+    if (!this.jwt || !this.auth.tenant) {
       throw new Error(
         'Websocket connection failed because of missing information'
       );
-    this.sws = new ws.WebSocket(
+    }
+
+    clearTimeout(this.reconnectTimeout);
+
+    console.log('[info] Start connection');
+
+    this.retryCount = this.retryCount + 1;
+
+    const heartbeat = () => {
+      clearTimeout(this.pingTimeout);
+
+      // Use `WebSocket#terminate()`, which immediately destroys the connection,
+      // instead of `WebSocket#close()`, which waits for the close timer.
+      // Delay should be equal to the interval at which your server
+      // sends out pings plus a conservative assumption of the latency.
+      this.pingTimeout = setTimeout(() => {
+        this.sws.terminate();
+      }, 60000);
+    };
+
+    this.sws = new WebSocket(
       `wss://${this.auth.tenant}/notification2/consumer/?token=${this.jwt}`
     );
 
-    this.sws.on('error', () => {
-      this.connect();
+    this.sws.on('ping', () => {
+      heartbeat();
     });
+
+    this.sws.on('close', (code, reason) => {
+      const delay = this.getReconnectDelay();
+      console.log(
+        `[info] Connection closed. (Code: ${code}, Reason: ${reason}). Reconnecting in ${
+          delay / 1000
+        }s...`
+      );
+      clearTimeout(this.pingTimeout);
+      this.reconnectTimeout = setTimeout(() => this.connect(), delay);
+    });
+
+    this.sws.on('error', async err => {
+      console.log(`[error] Connection error`);
+      console.log(err);
+
+      if (err.message.includes('401')) {
+        console.log('Subscribes token expired, renewing...');
+        this.tokenExpired = true;
+        try {
+          await this.getToken();
+
+          console.log('[info] Renewed token');
+
+          this.tokenExpired = false;
+          this.connect();
+        } catch (err) {
+          console.log(`[error] Failed to renew token.`, e);
+        }
+      }
+    });
+
     this.sws.on('open', () => {
+      this.retryCount = 0;
+      heartbeat();
+
+      console.log('[info] Waiting for messages');
       this.sws.on('message', data => {
+        heartbeat();
         this.handleNewMessage(data);
       });
     });
@@ -299,16 +395,14 @@ class RealTimeWs {
    * Handles a connection fail
    * @param  {string} data a realtime-notification
    */
-  handleNewMessage(rawData) {
-    const data = Buffer.from(rawData, 'base64').toString();
-
+  handleNewMessage(data) {
     // First 3 Lines are header
     const [header, body] = data.split('\n\n');
 
     // encoded binary 64 bit value, notification type and source, CREATE | UPDATE | DELETE | ... must be CREATE for measurements
     const [msgID, notificationDesc, action] = header.split('\n');
     // notificationType event, measurement, alarm or managed object.
-    const [tenantID, notificationType, source] = notificationDesc.split('/');
+    // const [tenantID, notificationType, source] = notificationDesc.split('/');
     /*
     {
       "<FRAGMENT_NAME>": {
@@ -370,8 +464,12 @@ class RealTimeWs {
    */
   processMeasurement(msg) {
     // only process messages from the selected channel
-    if (msg.type === this.config.channel) {
-      const measurement = new Measurement(msg, this.config.datapoint);
+    if (Object.keys(msg).some(key => key === this.config.channel)) {
+      const measurement = new Measurement(
+        msg,
+        this.config.datapoint,
+        this.config.channel
+      );
 
       this.node.send(measurement.getMsg(this.config.format));
     }
@@ -382,8 +480,6 @@ class RealTimeWs {
    * @param  {object} msg a realtime-notification
    */
   processAlarm(msg) {
-    console.log('ALARM MSG', msg);
-
     const formattedMsg = {
       data: msg
     };
