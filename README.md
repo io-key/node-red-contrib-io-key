@@ -641,7 +641,26 @@ For deeper functions Alexa skills are needed. You find more information to this 
 ]
 ```
 
-## Development
+## Contribution
+
+Feel free to contribute to this project. Please create a pull request and we will review it.
+
+### Create a new release
+
+1. Update version in package.json
+
+2. Create an push new tag within repo
+
+```
+git tag <version>
+git push origin <version>
+```
+
+3. Publish release on npm
+
+```
+npm publish
+```
 
 ## License
 
