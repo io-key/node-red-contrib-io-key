@@ -397,7 +397,8 @@ class RealTimeWs {
    */
   handleNewMessage(data) {
     // First 3 Lines are header
-    const [header, body] = data.split('\n\n');
+
+    const [header, body] = data.toString('utf-8').split('\n\n');
 
     // encoded binary 64 bit value, notification type and source, CREATE | UPDATE | DELETE | ... must be CREATE for measurements
     const [msgID, notificationDesc, action] = header.split('\n');
