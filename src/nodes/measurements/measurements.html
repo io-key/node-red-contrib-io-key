@@ -6,14 +6,14 @@
       name: { value: '' },
       auth: {
         value: { tenant: '', username: '', password: '' },
-        type: 'tenant-config',
+        type: 'tenant-config'
       },
-      connection: {value: 'websocket'},
+      connection: { value: 'websocket' },
       device: { value: '' },
       sensor: { value: '' },
       channel: { value: '' },
       format: { value: 'none' },
-      datapoint: { value: '' },
+      datapoint: { value: '' }
     },
     color: '#356a96',
     labelStyle: 'color: #fff',
@@ -45,7 +45,7 @@
       this.sensor = sensor;
       this.channel = channel;
       this.datapoint = datapoint;
-    },
+    }
   });
 </script>
 
@@ -61,7 +61,7 @@
   <div class="form-row">
     <label for="node-input-connection"> Connection</label>
     <select id="node-input-connection" style="width:70%;">
-      <option value="longPolling">Long Polling</option>
+      <option value="longPolling">Long Polling (deprecated)</option>
       <option value="websocket" selected="selected">Websocket</option>
     </select>
   </select>
