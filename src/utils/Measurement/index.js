@@ -43,7 +43,18 @@ class Measurement {
     const { type, time } = data;
     const source = data.source.id;
     const seriesData = data[this.channel];
-    const { value, unit } = seriesData[type];
+
+    let value = null;
+    let unit = null;
+
+    // usually "type" does match the name of the series attribute, but sometimes it doesn't
+    try {
+      value = seriesData[type].value;
+      unit = seriesData[type].unit;
+    } catch (e) {
+      value = seriesData[Object.keys(seriesData)[0]].value;
+      unit = seriesData[Object.keys(seriesData)[0]].unit;
+    }
 
     this.msg = {
       payload: { type: this.channel, time, series: type, value, unit, source }
