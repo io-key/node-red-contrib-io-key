@@ -1,0 +1,15 @@
+meta {
+  name: Get Subscriptions
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://{{tenant}}/notification2/subscriptions?withTotalElements=true
+  body: none
+  auth: inherit
+}
+
+params:query {
+  withTotalElements: true
+}

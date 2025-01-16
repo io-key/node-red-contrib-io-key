@@ -1,0 +1,27 @@
+meta {
+  name: 2 Create Subscription
+  type: http
+  seq: 4
+}
+
+post {
+  url: https://{{tenant}}/notification2/subscriptions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "source": {
+      "id": "{{sensorId}}"
+    },
+    "context": "mo",
+    "subscription": "{{subscription}}",
+    "subscriptionFilter": {
+      "apis": [
+        "measurements"
+      ],
+      "typeFilter": "LDH292-1"
+    }
+  }
+}

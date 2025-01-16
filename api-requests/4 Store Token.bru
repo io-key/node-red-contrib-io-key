@@ -1,0 +1,23 @@
+meta {
+  name: 4 Store Token
+  type: http
+  seq: 6
+}
+
+put {
+  url: https://{{tenant}}/inventory/managedObjects/{{sensorId}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "io-key-node-red_bruno": {
+      "type": "measurements",
+      "channel": "LDH292-1",
+      "subscriber": "{{subscription}}",
+      "subscription": "{{subscription}}",
+      "token": "{{jwt}}"
+    }
+  }
+}

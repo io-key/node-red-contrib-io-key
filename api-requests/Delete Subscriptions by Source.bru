@@ -1,0 +1,15 @@
+meta {
+  name: Delete Subscriptions by Source
+  type: http
+  seq: 3
+}
+
+delete {
+  url: https://{{tenant}}/notification2/subscriptions?source={{sensorId}}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  source: {{sensorId}}
+}

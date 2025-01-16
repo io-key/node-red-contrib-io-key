@@ -1,0 +1,23 @@
+meta {
+  name: 3 Get Token
+  type: http
+  seq: 5
+}
+
+post {
+  url: https://{{tenant}}/notification2/token
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "subscriber": "{{subscription}}",
+    "subscription": "{{subscription}}",
+    "expiresInMinutes": 5
+  }
+}
+
+script:post-response {
+  bru.setEnvVar("jwt",res.body.token)
+}

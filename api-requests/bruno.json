@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "node-red-contrib-io-key",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
