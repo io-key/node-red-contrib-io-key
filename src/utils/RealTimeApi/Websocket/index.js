@@ -23,13 +23,22 @@ class RealTimeWs {
     this.tenantId = '';
     this.encodedCredentials = '';
     this.jwt = null;
-    this.clientId = 'iokeynodered' + this.config.id;
+
+    // Remove non-alphanumeric characters from channel for clientId
+    const cleanChannel = this.config.channel.replace(/[^a-zA-Z0-9]/g, '');
+    // client id must be alphanumeric
+    // iokeynodered as prefix
+    // type => t${this.config.type} "measurements", "alarms", "events"
+    // sensor => s${this.config.sensor}
+    // channel => c${this.config.channel}
+    this.clientId = `iokeynoderedt${this.config.type}s${this.config.sensor}c${cleanChannel}`;
+
     this.subResponse = null;
     this.pingInterval = null;
     this.pingTimeout = null;
     this.pingIntervalTime = 60000; // Sending ping every minute
     this.pongTimeoutTime = 10000; // pong must be received within 10s
-    this.tokenExpiresIn = 10; // max 1440
+    this.tokenExpiresIn = 1440; // max 1440
     this.tokenExpired = false;
     this.wsTimeUntilTimeout = 30000;
     this.baseReconnectDelay = 10000;
@@ -39,8 +48,6 @@ class RealTimeWs {
     this.reconnectTimeout = null;
 
     this.setCredentials(auth);
-
-    console.log(this.config);
 
     /**
      * Constants to describe all status types of the node
@@ -96,35 +103,69 @@ class RealTimeWs {
       // Check and cleanup old subscriptions
       // await this.cleanupOldSubscriptions(data);
 
-      const connectionKey = `io-key-node-red_${this.config.id}`;
+      const connectionKey = `io-key-node-red_${this.config.type}_${this.config.sensor}_${this.config.channel}`;
       const connectionInfo = data[connectionKey];
 
       if (connectionInfo) {
         const token = connectionInfo.token;
+        const subscriptionId = connectionInfo.subscriptionId;
 
-        if (token) {
-          // Check if token is expired
+        if (token && subscriptionId) {
+          // Check if subscription is still valid
           try {
-            const tokenData = JSON.parse(atob(token.split('.')[1]));
+            const subscriptionResponse = await fetch(
+              `https://${this.auth.tenant}/notification2/subscriptions/${subscriptionId}`,
+              {
+                method: 'GET',
+                headers: {
+                  Authorization: auth,
+                  Accept: 'application/json'
+                }
+              }
+            );
 
-            if (tokenData.exp * 1000 > Date.now()) {
-              this.jwt = token;
-              console.log('[info] Reusing exisiting subscription and token');
-              // Update lastUsed when reusing valid token
-              await this.updateLastUsed();
-              return true;
-            } else {
+            if (subscriptionResponse.status === 404) {
               console.log(
-                `[info] Found exisiting subscription with expired token (expired at ${new Date(
-                  tokenData.exp * 1000
-                ).toISOString()}), renewing...`
+                '[info] Subscription no longer exists, creating new one...'
               );
+              return false;
+            }
+
+            // Check if token is expired
+            try {
+              const tokenData = JSON.parse(atob(token.split('.')[1]));
+
+              if (tokenData.exp * 1000 > Date.now()) {
+                this.jwt = token;
+                console.log(
+                  `[info] Reusing existing subscription and token from ${connectionKey}`
+                );
+                // Update lastUsed when reusing valid token
+                await this.updateLastUsed();
+                return true;
+              } else {
+                console.log(
+                  `[info] Found existing subscription with expired token (expired at ${new Date(
+                    tokenData.exp * 1000
+                  ).toISOString()}), renewing...`
+                );
+              }
+            } catch (e) {
+              console.log('[error] Failed to parse token:', e);
             }
           } catch (e) {
-            console.log('[error] Failed to parse token:', e);
+            console.log('[error] Failed to check subscription validity:', e);
+            return false;
           }
         } else {
-          console.log('[warn] Found exisiting subscription without token');
+          if (!token) {
+            console.log('[warn] Found existing subscription without token');
+          }
+          if (!subscriptionId) {
+            console.log(
+              '[warn] Found existing subscription without subscription ID'
+            );
+          }
         }
 
         // Token expired, get new one
@@ -258,7 +299,7 @@ class RealTimeWs {
   ) {
     const url = `https://${this.auth.tenant}/inventory/managedObjects/${this.config.sensor}`;
     const auth = `Basic ${this.encodedCredentials}`;
-    const connectionKey = `io-key-node-red_${this.config.id}`;
+    const connectionKey = `io-key-node-red_${this.config.type}_${this.config.sensor}_${this.config.channel}`;
 
     try {
       // Parse token to get expiration
@@ -271,7 +312,7 @@ class RealTimeWs {
         );
       } else {
         console.log(
-          `[info] Storing new subscription, token valid until ${expiresAt}`
+          `[info] Storing new subscription in ${connectionKey}, token valid until ${expiresAt}`
         );
       }
 
@@ -282,6 +323,7 @@ class RealTimeWs {
           channel: this.config.channel,
           subscriber: subscriber,
           subscription: subscription,
+          subscriptionId: this.subResponse?.id,
           token: token,
           createdAt: existingInfo ? existingInfo.createdAt : now,
           updatedAt: now,
@@ -410,7 +452,6 @@ class RealTimeWs {
       });
 
       const response = await res.json();
-      console.log(response);
       const token = response.token;
 
       if (token && token.length !== 0) {
@@ -448,6 +489,9 @@ class RealTimeWs {
       throw new Error('Invalid Sensor');
     }
 
+    console.log(this.node);
+    console.log(this.config);
+
     const reqPayload = {
       source: {
         id: this.config.sensor
@@ -457,8 +501,11 @@ class RealTimeWs {
       subscriptionFilter: {
         apis: [this.node.type]
       },
-      nonPersistent: true
+      nonPersistent: true,
+      shared: true
     };
+
+    console.log(reqPayload);
 
     try {
       const res = await fetch(
@@ -528,7 +575,7 @@ class RealTimeWs {
     this.retryCount = this.retryCount + 1;
 
     const sendPing = () => {
-      // console.log('[info] Send ping');
+      console.log('[info] Send ping');
       this.sws.ping();
 
       this.pongTimeout = setTimeout(() => {
@@ -550,7 +597,7 @@ class RealTimeWs {
     );
 
     this.sws.on('pong', () => {
-      // console.log('[debug] Received pong');
+      console.log('[debug] Received pong');
       clearTimeout(this.pongTimeout);
     });
 
@@ -579,7 +626,9 @@ class RealTimeWs {
           console.log('[info] Renewed token');
 
           this.tokenExpired = false;
-          this.connect();
+
+          this.sws.terminate();
+          // this.connect();
         } catch (err) {
           console.log(`[error] Failed to renew token.`, e);
         }
@@ -593,7 +642,7 @@ class RealTimeWs {
 
       // console.log('[info] Waiting for messages (new)');
       this.sws.on('message', data => {
-        // console.log('[debug] Received message');
+        console.log('[debug] Received message');
         this.handleNewMessage(data);
       });
     });
@@ -622,7 +671,7 @@ class RealTimeWs {
   async updateLastUsed() {
     const url = `https://${this.auth.tenant}/inventory/managedObjects/${this.config.sensor}`;
     const auth = `Basic ${this.encodedCredentials}`;
-    const connectionKey = `io-key-node-red_${this.config.id}`;
+    const connectionKey = `io-key-node-red_${this.config.type}_${this.config.sensor}_${this.config.channel}`;
 
     try {
       const response = await fetch(url, {
