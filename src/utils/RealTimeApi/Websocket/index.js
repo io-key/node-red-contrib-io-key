@@ -7,6 +7,11 @@ const Event = require('../../Event');
 const fetch = (...args) =>
   import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
+// Create subscription and subscriber for every node (uinque node id)
+// Not persistant
+// Store state in Sensors managed Object (token)
+// Name of subscribers must not change for one node
+
 /**
  * Connects to cumulocity's realtime-notification API
  * */
@@ -18,17 +23,17 @@ class RealTimeWs {
     this.tenantId = '';
     this.encodedCredentials = '';
     this.jwt = null;
-    this.subscriptionName = 'nodeRed' + uuid.v4().replace(/-/g, '');
-    this.clientId = 'nodeRed' + uuid.v4().replace(/-/g, '');
+    this.clientId = 'iokeynodered' + this.config.id;
     this.subResponse = null;
-    this.pingTimeout;
+    this.pingInterval = null;
+    this.pingTimeout = null;
+    this.pingIntervalTime = 60000; // Sending ping every minute
+    this.pongTimeoutTime = 10000; // pong must be received within 10s
     this.tokenExpiresIn = 10; // max 1440
     this.tokenExpired = false;
     this.wsTimeUntilTimeout = 30000;
     this.baseReconnectDelay = 10000;
     this.retryCount = 0;
-
-    this.subscriptionNameID = null;
     this.connected = false;
     this.sws = null;
     this.reconnectTimeout = null;
@@ -69,9 +74,116 @@ class RealTimeWs {
   }
 
   /**
+   * Check if connection info exists and is valid, otherwise create new subscription
+   */
+  async checkConnectionInfo() {
+    const url = `https://${this.auth.tenant}/inventory/managedObjects/${this.config.sensor}`;
+    const auth = `Basic ${this.encodedCredentials}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: auth,
+          Accept: 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      const connectionKey = `io-key-node-red_${this.config.id}`;
+      const connectionInfo = data[connectionKey];
+
+      if (connectionInfo) {
+        const token = connectionInfo.token;
+        if (token) {
+          // Check if token is expired
+          try {
+            const tokenData = JSON.parse(atob(token.split('.')[1]));
+            if (tokenData.exp * 1000 > Date.now()) {
+              this.jwt = token;
+              return true;
+            }
+          } catch (e) {
+            console.log('[error] Failed to parse token:', e);
+          }
+        }
+
+        // Token expired, get new one
+        if (connectionInfo.subscriber && connectionInfo.subscription) {
+          const tokenResponse = await fetch(
+            `https://${this.auth.tenant}/notification2/token`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                Authorization: auth
+              },
+              body: JSON.stringify({
+                subscriber: connectionInfo.subscriber,
+                subscription: connectionInfo.subscription,
+                expiresInMinutes: 5
+              })
+            }
+          );
+
+          const newToken = await tokenResponse.json();
+          if (newToken.token) {
+            this.jwt = newToken.token;
+            await this.storeConnectionInfo(
+              connectionInfo.subscriber,
+              connectionInfo.subscription,
+              newToken.token
+            );
+            return true;
+          }
+        }
+      }
+
+      return false;
+    } catch (e) {
+      console.log('[error] Failed to check connection info:', e);
+      return false;
+    }
+  }
+
+  /**
+   * Store connection info in managed object
+   */
+  async storeConnectionInfo(subscriber, subscription, token) {
+    const url = `https://${this.auth.tenant}/inventory/managedObjects/${this.config.sensor}`;
+    const auth = `Basic ${this.encodedCredentials}`;
+    const connectionKey = `io-key-node-red_${this.config.id}`;
+
+    try {
+      const payload = {
+        [connectionKey]: {
+          type: this.config.type,
+          channel: this.config.channel,
+          subscriber: subscriber,
+          subscription: subscription,
+          [`${connectionKey}.token`]: token
+        }
+      };
+
+      await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: auth
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.log('[error] Failed to store connection info:', e);
+    }
+  }
+
+  /**
    * Starts a session, subscribe to a channel and then connects to receive data
    */
-  start() {
+  async start() {
     if (!Credentials.validateCredentials(this.auth)) {
       this.setStatus(this.STATUS_TYPES.MISSING_CREDENTIALS);
       return;
@@ -79,44 +191,53 @@ class RealTimeWs {
 
     this.setStatus(this.STATUS_TYPES.CONNECTING);
 
-    this.encodeCredentials()
-      .then(() => {
-        return this.createSubscription();
-      })
-      .then(() => {
-        return this.getToken();
-      })
-      .then(() => {
-        setTimeout(() => {
-          console.log('[info] Successfully connected!');
-          this.connected = true;
-          this.setStatus(this.STATUS_TYPES.CONNECTED);
+    try {
+      await this.encodeCredentials();
 
-          return this.startNewConnection();
-        }, '1000');
-      })
-      .catch(e => {
-        if (e.error) {
-          if (
-            e.error === this.ERROR_TYPES.HANDSHAKE_FAILED ||
-            e.error === this.ERROR_TYPES.SUBSCRIPTION_FAILED
-          ) {
-            this.handleSessionStartError();
-            return;
-          }
-          if ((e.error = this.ERROR_TYPES.BAD_CREDENTIALS)) {
-            this.setStatus(this.STATUS_TYPES.INVALID_CREDENTIALS);
-          }
-        }
-        if (e.code === 'EAI_AGAIN' || e.code === 'ECONNRESET') {
+      // Check existing connection info
+      const hasValidConnection = await this.checkConnectionInfo();
+
+      if (!hasValidConnection) {
+        // Create new subscription and get token
+        await this.createSubscription();
+        const tokenResponse = await this.getToken();
+        await this.storeConnectionInfo(
+          this.clientId,
+          this.clientId,
+          tokenResponse
+        );
+      }
+
+      setTimeout(() => {
+        console.log('[info] Successfully connected!');
+        this.connected = true;
+        this.setStatus(this.STATUS_TYPES.CONNECTED);
+        return this.startNewConnection();
+      }, 1000);
+    } catch (e) {
+      if (e.error) {
+        if (
+          e.error === this.ERROR_TYPES.HANDSHAKE_FAILED ||
+          e.error === this.ERROR_TYPES.SUBSCRIPTION_FAILED
+        ) {
           this.handleSessionStartError();
           return;
         }
-      });
+        if (e.error === this.ERROR_TYPES.BAD_CREDENTIALS) {
+          this.setStatus(this.STATUS_TYPES.INVALID_CREDENTIALS);
+        }
+      }
+      if (e.code === 'EAI_AGAIN' || e.code === 'ECONNRESET') {
+        this.handleSessionStartError();
+        return;
+      }
+    }
   }
 
-  handleSessionStartError() {
-    //TODO
+  async handleSessionStartError() {
+    console.log('[error] Failed to start session, try again in 10 seconds!');
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    this.start();
   }
 
   /**
@@ -141,19 +262,20 @@ class RealTimeWs {
   /**
    * Request a jwt token from notification 2.0 api
    *
-   * @returns {Promise}
+   * @returns {Promise<string>} The JWT token
    */
-  getToken() {
+  async getToken() {
     const url = `https://${this.auth.tenant}/notification2/token`;
     const auth = `Basic ${this.encodedCredentials}`;
-    return new Promise((resolve, reject) => {
+
+    try {
       const reqPayload = {
         subscriber: this.clientId,
-        subscription: this.subscriptionName,
-        expiresInMinutes: this.tokenExpiresIn
+        subscription: this.clientId,
+        expiresInMinutes: 5
       };
 
-      fetch(url, {
+      const res = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -161,122 +283,88 @@ class RealTimeWs {
           Authorization: auth
         },
         body: JSON.stringify(reqPayload)
-      })
-        .then(res => {
-          res
-            .json()
-            .then(response => {
-              const token = response.token;
+      });
 
-              if (token && token.length !== 0) {
-                console.log(
-                  `[info] Successfully fetched token (Code: ${res.status})`
-                );
-                this.jwt = token;
-                return resolve(this.jwt);
-              } else {
-                console.log(
-                  `[info] Failed to fetch token (Code: ${res.status})`
-                );
+      const response = await res.json();
+      console.log(response);
+      const token = response.token;
 
-                if (res.status === 403) {
-                  this.setStatus(this.STATUS_TYPES.INVALID_CREDENTIALS);
-                } else {
-                  this.setStatus(this.STATUS_TYPES.CONNECTION_FAILED);
-                }
+      if (token && token.length !== 0) {
+        console.log(`[info] Successfully fetched token (Code: ${res.status})`);
+        this.jwt = token;
+        return token;
+      } else {
+        console.log(`[info] Failed to fetch token (Code: ${res.status})`);
 
-                return reject({ error: 'handshake_failed' });
-              }
-            })
-            .catch(e => {
-              console.log('[error]: Error fetching token', e);
-              this.setStatus(this.STATUS_TYPES.CONNECTION_FAILED);
-              if (e && e.response && e.response.status === 401) {
-                this.setStatus(this.STATUS_TYPES.INVALID_CREDENTIALS);
-              }
-              reject(e);
-            });
-        })
-        .catch(e => {
-          console.log('[error]: Error fetching token', e);
+        if (res.status === 403) {
+          this.setStatus(this.STATUS_TYPES.INVALID_CREDENTIALS);
+        } else {
           this.setStatus(this.STATUS_TYPES.CONNECTION_FAILED);
-          if (e && e.response && e.response.status === 401) {
-            this.setStatus(this.STATUS_TYPES.INVALID_CREDENTIALS);
-          }
-          reject(e);
-        });
-    });
+        }
+
+        throw { error: 'handshake_failed' };
+      }
+    } catch (e) {
+      console.log('[error]: Error fetching token', e);
+      this.setStatus(this.STATUS_TYPES.CONNECTION_FAILED);
+      if (e?.response?.status === 401) {
+        this.setStatus(this.STATUS_TYPES.INVALID_CREDENTIALS);
+      }
+      throw e;
+    }
   }
 
   /**
    * Create a subscription
-   *
-   * @returns {Promise>}
+   * @returns {Promise<void>}
    */
-  createSubscription() {
-    return new Promise((resolve, reject) => {
-      if (!this.validateSensor()) {
-        this.setStatus(this.STATUS_TYPES.INVALID_SENSOR);
-        reject(new Error('Invalid Sensor'));
-        return;
+  async createSubscription() {
+    if (!this.validateSensor()) {
+      this.setStatus(this.STATUS_TYPES.INVALID_SENSOR);
+      throw new Error('Invalid Sensor');
+    }
+
+    const reqPayload = {
+      source: {
+        id: this.config.sensor
+      },
+      context: 'mo',
+      subscription: this.clientId,
+      subscriptionFilter: {
+        apis: [this.node.type]
       }
+    };
 
-      const reqPayload = {
-        source: {
-          id: this.config.sensor
-        },
-        context: 'mo',
-        subscription: this.subscriptionName,
-        subscriptionFilter: {
-          apis: [this.node.type] // measurements
-          // typeFilter:
-          //   this.node.type === 'measurements' ? this.config.channel : undefined
+    try {
+      const res = await fetch(
+        `https://${this.auth.tenant}/notification2/subscriptions`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/vnd.com.nsn.cumulocity.subscription+json',
+            Authorization: `Basic ${this.encodedCredentials}`
+          },
+          body: JSON.stringify(reqPayload)
         }
-      };
+      );
 
-      return fetch(`https://${this.auth.tenant}/notification2/subscriptions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/vnd.com.nsn.cumulocity.subscription+json',
-          Authorization: `Basic ${this.encodedCredentials}`
-        },
-        body: JSON.stringify(reqPayload)
-      })
-        .then(res => {
-          res
-            .json()
-            .then(response => {
-              const data = response;
+      const data = await res.json();
 
-              if (data?.id?.length !== 0) {
-                console.log('[info] Successfully created Subscription');
-                this.subResponse = data;
-              } else {
-                reject(this.handleSubscriptionFail(data));
-              }
-              resolve();
-            })
-            .catch(e => {
-              console.log('[error] Error creating subscription', e);
-              const errMsg = this.handleSubscriptionFail({
-                error: [e.response?.status || 'An unexpected error occurred.']
-              });
-              this.setStatus(errMsg.error);
-              reject(e);
-            });
-
-          resolve();
-        })
-        .catch(e => {
-          console.log('[error] Error creating subscription"', e);
-          const errMsg = this.handleSubscriptionFail({
-            error: ['An unexpected error occurred.']
-          });
-          this.setStatus(errMsg.error);
-          reject(e);
-        });
-    });
+      if (data?.id?.length !== 0) {
+        console.log('[info] Successfully created Subscription');
+        this.subResponse = data;
+      } else {
+        throw this.handleSubscriptionFail(data);
+      }
+    } catch (e) {
+      console.log('[error] Error creating subscription', e);
+      const errMsg = this.handleSubscriptionFail({
+        error: [e.response?.status || 'An unexpected error occurred.']
+      });
+      this.setStatus(errMsg.error);
+      throw e;
+    }
   }
 
   /**
@@ -314,24 +402,31 @@ class RealTimeWs {
 
     this.retryCount = this.retryCount + 1;
 
-    const heartbeat = () => {
-      clearTimeout(this.pingTimeout);
+    const sendPing = () => {
+      console.log('[info] Send ping');
+      this.sws.ping();
 
-      // Use `WebSocket#terminate()`, which immediately destroys the connection,
-      // instead of `WebSocket#close()`, which waits for the close timer.
-      // Delay should be equal to the interval at which your server
-      // sends out pings plus a conservative assumption of the latency.
-      this.pingTimeout = setTimeout(() => {
+      this.pongTimeout = setTimeout(() => {
+        console.log('[info] Terminate due to pong timeout');
+
+        // Use `WebSocket#terminate()`, which immediately destroys the connection,
+        // instead of `WebSocket#close()`, which waits for the close timer.
+        // Delay should be equal to the interval at which your server
+        // sends out pings plus a conservative assumption of the latency.
         this.sws.terminate();
-      }, 60000);
+
+        clearTimeout(this.pingTimeout);
+        clearInterval(this.pingInterval);
+      }, this.pongTimeoutTime);
     };
 
     this.sws = new WebSocket(
       `wss://${this.auth.tenant}/notification2/consumer/?token=${this.jwt}`
     );
 
-    this.sws.on('ping', () => {
-      heartbeat();
+    this.sws.on('pong', () => {
+      console.log('[info] Received pong');
+      clearTimeout(this.pongTimeout);
     });
 
     this.sws.on('close', (code, reason) => {
@@ -342,6 +437,7 @@ class RealTimeWs {
         }s...`
       );
       clearTimeout(this.pingTimeout);
+      clearInterval(this.pingInterval);
       this.reconnectTimeout = setTimeout(() => this.connect(), delay);
     });
 
@@ -367,11 +463,12 @@ class RealTimeWs {
 
     this.sws.on('open', () => {
       this.retryCount = 0;
-      heartbeat();
 
-      console.log('[info] Waiting for messages');
+      this.pingInterval = setInterval(sendPing, this.pingIntervalTime);
+
+      console.log('[info] Waiting for messages (new)');
       this.sws.on('message', data => {
-        heartbeat();
+        console.log('[info] Received message');
         this.handleNewMessage(data);
       });
     });
@@ -389,6 +486,9 @@ class RealTimeWs {
     });
     this.sws.terminate();
     this.sws = null;
+
+    clearTimeout(this.pingTimeout);
+    clearInterval(this.pingInterval);
   }
 
   /**
@@ -396,6 +496,8 @@ class RealTimeWs {
    * @param  {string} data a realtime-notification
    */
   handleNewMessage(data) {
+    console.log(data);
+    console.log(data.toString('utf-8'));
     // First 3 Lines are header
 
     const [header, body] = data.toString('utf-8').split('\n\n');
@@ -464,6 +566,8 @@ class RealTimeWs {
    * @param  {object} msg a realtime-notification
    */
   processMeasurement(msg) {
+    console.log(this.config);
+
     // only process messages from the selected channel
     if (Object.keys(msg).some(key => key === this.config.channel)) {
       const measurement = new Measurement(
