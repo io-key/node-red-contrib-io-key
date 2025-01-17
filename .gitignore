@@ -2,5 +2,8 @@
 /node_modules
 /dbdata
 /grafanadata
+/node_red_data
 .DS_Store
 .node-red
+api-requests/environments/*
+!api-requests/environments/example.bru
