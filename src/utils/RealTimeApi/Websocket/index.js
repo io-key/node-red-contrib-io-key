@@ -49,6 +49,8 @@ class RealTimeWs {
 
     this.setCredentials(auth);
 
+    // console.log(this.config);
+
     /**
      * Constants to describe all status types of the node
      * */
@@ -58,7 +60,8 @@ class RealTimeWs {
       INVALID_SENSOR: 'invalidSensor',
       CONNECTING: 'connecting',
       CONNECTED: 'connected',
-      CONNECTION_FAILED: 'connection_failed'
+      CONNECTION_FAILED: 'connection_failed',
+      SUBSCRIPTION_IN_USE: 'subscription_in_use'
     };
 
     this.ERROR_TYPES = {
@@ -489,8 +492,8 @@ class RealTimeWs {
       throw new Error('Invalid Sensor');
     }
 
-    console.log(this.node);
-    console.log(this.config);
+    // console.log(this.node);
+    // console.log(this.config);
 
     const reqPayload = {
       source: {
@@ -500,12 +503,13 @@ class RealTimeWs {
       subscription: this.clientId,
       subscriptionFilter: {
         apis: [this.node.type]
+        // typeFilter: this.config.channel // seems not to work
       },
-      nonPersistent: true,
+      nonPersistent: false,
       shared: true
     };
 
-    console.log(reqPayload);
+    // console.log(reqPayload);
 
     try {
       const res = await fetch(
@@ -633,6 +637,10 @@ class RealTimeWs {
           console.log(`[error] Failed to renew token.`, e);
         }
       }
+      if (err.message.includes('409')) {
+        this.setStatus(this.STATUS_TYPES.SUBSCRIPTION_IN_USE);
+        this.sws.terminate();
+      }
     });
 
     this.sws.on('open', () => {
@@ -739,6 +747,8 @@ class RealTimeWs {
     }
     */
     const msg = JSON.parse(body);
+
+    // console.log(msg);
 
     // ACK receipt
     this.sws.send(msgID.trim());
@@ -907,6 +917,13 @@ class RealTimeWs {
           fill: 'red',
           shape: 'dot',
           text: 'Failed to establish connection'
+        });
+        break;
+      case this.STATUS_TYPES.SUBSCRIPTION_IN_USE:
+        this.node.status({
+          fill: 'red',
+          shape: 'dot',
+          text: 'Subscription curently in use'
         });
         break;
       default:
