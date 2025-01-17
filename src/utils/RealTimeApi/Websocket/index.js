@@ -40,6 +40,8 @@ class RealTimeWs {
 
     this.setCredentials(auth);
 
+    console.log(this.config);
+
     /**
      * Constants to describe all status types of the node
      * */
@@ -90,22 +92,39 @@ class RealTimeWs {
       });
 
       const data = await response.json();
+
+      // Check and cleanup old subscriptions
+      // await this.cleanupOldSubscriptions(data);
+
       const connectionKey = `io-key-node-red_${this.config.id}`;
       const connectionInfo = data[connectionKey];
 
       if (connectionInfo) {
         const token = connectionInfo.token;
+
         if (token) {
           // Check if token is expired
           try {
             const tokenData = JSON.parse(atob(token.split('.')[1]));
+
             if (tokenData.exp * 1000 > Date.now()) {
               this.jwt = token;
+              console.log('[info] Reusing exisiting subscription and token');
+              // Update lastUsed when reusing valid token
+              await this.updateLastUsed();
               return true;
+            } else {
+              console.log(
+                `[info] Found exisiting subscription with expired token (expired at ${new Date(
+                  tokenData.exp * 1000
+                ).toISOString()}), renewing...`
+              );
             }
           } catch (e) {
             console.log('[error] Failed to parse token:', e);
           }
+        } else {
+          console.log('[warn] Found exisiting subscription without token');
         }
 
         // Token expired, get new one
@@ -133,7 +152,8 @@ class RealTimeWs {
             await this.storeConnectionInfo(
               connectionInfo.subscriber,
               connectionInfo.subscription,
-              newToken.token
+              newToken.token,
+              connectionInfo
             );
             return true;
           }
@@ -147,22 +167,126 @@ class RealTimeWs {
     }
   }
 
+  // /**
+  //  * Unsubscribe and cleanup old subscriptions
+  //  * @param {object} managedObject The managed object containing subscriptions
+  //  */
+  // async cleanupOldSubscriptions(managedObject) {
+  //   const sevenDaysAgo = new Date();
+  //   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  //   for (const [key, value] of Object.entries(managedObject)) {
+  //     // Skip if not an io-key subscription or if it's the current subscription
+  //     if (
+  //       !key.startsWith('io-key-node-red_') ||
+  //       key === `io-key-node-red_${this.config.id}`
+  //     ) {
+  //       continue;
+  //     }
+
+  //     // Check if subscription is old (not used for 7 days)
+  //     if (value.lastUsed && new Date(value.lastUsed) < sevenDaysAgo) {
+  //       console.log(`[info] Found old subscription: ${key}, deleting...`);
+  //       try {
+  //         // If token is expired, get a new one
+  //         let token = value.token;
+  //         const tokenData = JSON.parse(atob(token.split('.')[1]));
+  //         if (tokenData.exp * 1000 <= Date.now()) {
+  //           const tokenResponse = await fetch(
+  //             `https://${this.auth.tenant}/notification2/token`,
+  //             {
+  //               method: 'POST',
+  //               headers: {
+  //                 'Content-Type': 'application/json',
+  //                 Accept: 'application/json',
+  //                 Authorization: `Basic ${this.encodedCredentials}`
+  //               },
+  //               body: JSON.stringify({
+  //                 subscriber: value.subscriber,
+  //                 subscription: value.subscription,
+  //                 expiresInMinutes: 5
+  //               })
+  //             }
+  //           );
+  //           const newToken = await tokenResponse.json();
+  //           token = newToken.token;
+  //         }
+
+  //         // Unsubscribe
+  //         await fetch(
+  //           `https://${this.auth.tenant}/notification2/unsubscribe?token=${token}`,
+  //           {
+  //             method: 'POST',
+  //             headers: {
+  //               Accept: 'application/json'
+  //             }
+  //           }
+  //         );
+
+  //         // Delete subscription from managed object
+  //         await fetch(
+  //           `https://${this.auth.tenant}/inventory/managedObjects/${this.config.sensor}`,
+  //           {
+  //             method: 'PUT',
+  //             headers: {
+  //               'Content-Type': 'application/json',
+  //               Accept: 'application/json',
+  //               Authorization: `Basic ${this.encodedCredentials}`
+  //             },
+  //             body: JSON.stringify({
+  //               [key]: null
+  //             })
+  //           }
+  //         );
+
+  //         console.log(`[info] Cleaned up old subscription: ${key}`);
+  //       } catch (e) {
+  //         console.log(`[error] Failed to cleanup subscription ${key}:`, e);
+  //       }
+  //     }
+  //   }
+  // }
+
   /**
    * Store connection info in managed object
    */
-  async storeConnectionInfo(subscriber, subscription, token) {
+  async storeConnectionInfo(
+    subscriber,
+    subscription,
+    token,
+    existingInfo = null
+  ) {
     const url = `https://${this.auth.tenant}/inventory/managedObjects/${this.config.sensor}`;
     const auth = `Basic ${this.encodedCredentials}`;
     const connectionKey = `io-key-node-red_${this.config.id}`;
 
     try {
+      // Parse token to get expiration
+      const tokenData = JSON.parse(atob(token.split('.')[1]));
+      const expiresAt = new Date(tokenData.exp * 1000).toISOString();
+
+      if (existingInfo) {
+        console.log(
+          `[info] Updating subscription with new token, valid until ${expiresAt}`
+        );
+      } else {
+        console.log(
+          `[info] Storing new subscription, token valid until ${expiresAt}`
+        );
+      }
+
+      const now = new Date().toISOString();
       const payload = {
         [connectionKey]: {
           type: this.config.type,
           channel: this.config.channel,
           subscriber: subscriber,
           subscription: subscription,
-          [`${connectionKey}.token`]: token
+          token: token,
+          createdAt: existingInfo ? existingInfo.createdAt : now,
+          updatedAt: now,
+          lastUsed: now,
+          expiresAt: expiresAt
         }
       };
 
@@ -332,7 +456,8 @@ class RealTimeWs {
       subscription: this.clientId,
       subscriptionFilter: {
         apis: [this.node.type]
-      }
+      },
+      nonPersistent: true
     };
 
     try {
@@ -398,12 +523,12 @@ class RealTimeWs {
 
     clearTimeout(this.reconnectTimeout);
 
-    console.log('[info] Start connection');
+    console.log('[debug] Start connection');
 
     this.retryCount = this.retryCount + 1;
 
     const sendPing = () => {
-      console.log('[info] Send ping');
+      // console.log('[info] Send ping');
       this.sws.ping();
 
       this.pongTimeout = setTimeout(() => {
@@ -425,7 +550,7 @@ class RealTimeWs {
     );
 
     this.sws.on('pong', () => {
-      console.log('[info] Received pong');
+      // console.log('[debug] Received pong');
       clearTimeout(this.pongTimeout);
     });
 
@@ -466,9 +591,9 @@ class RealTimeWs {
 
       this.pingInterval = setInterval(sendPing, this.pingIntervalTime);
 
-      console.log('[info] Waiting for messages (new)');
+      // console.log('[info] Waiting for messages (new)');
       this.sws.on('message', data => {
-        console.log('[info] Received message');
+        // console.log('[debug] Received message');
         this.handleNewMessage(data);
       });
     });
@@ -492,12 +617,54 @@ class RealTimeWs {
   }
 
   /**
+   * Update lastUsed timestamp for current connection
+   */
+  async updateLastUsed() {
+    const url = `https://${this.auth.tenant}/inventory/managedObjects/${this.config.sensor}`;
+    const auth = `Basic ${this.encodedCredentials}`;
+    const connectionKey = `io-key-node-red_${this.config.id}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: auth,
+          Accept: 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      const connectionInfo = data[connectionKey];
+
+      if (connectionInfo) {
+        const now = new Date().toISOString();
+        await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: auth
+          },
+          body: JSON.stringify({
+            [connectionKey]: {
+              ...connectionInfo,
+              lastUsed: now
+            }
+          })
+        });
+      }
+    } catch (e) {
+      console.log('[error] Failed to update lastUsed timestamp:', e);
+    }
+  }
+
+  /**
    * Handles a connection fail
    * @param  {string} data a realtime-notification
    */
   handleNewMessage(data) {
-    console.log(data);
-    console.log(data.toString('utf-8'));
+    // console.log(data);
+    // console.log(data.toString('utf-8'));
     // First 3 Lines are header
 
     const [header, body] = data.toString('utf-8').split('\n\n');
@@ -566,8 +733,6 @@ class RealTimeWs {
    * @param  {object} msg a realtime-notification
    */
   processMeasurement(msg) {
-    console.log(this.config);
-
     // only process messages from the selected channel
     if (Object.keys(msg).some(key => key === this.config.channel)) {
       const measurement = new Measurement(
