@@ -1,7 +1,7 @@
 meta {
   name: 4 Store Token
   type: http
-  seq: 6
+  seq: 9
 }
 
 put {
@@ -13,10 +13,10 @@ put {
 body:json {
   {
     "io-key-node-red_bruno": {
-      "type": "measurements",
-      "channel": "LDH292-1",
-      "subscriber": "{{subscription}}",
-      "subscription": "{{subscription}}",
+      "type": "{{type}}",
+      "channel": "{{channel}}",
+      "subscriber": "iokeynoderedt{{type}}s{{sensorId}}c{{channelClean}}",
+      "subscription": "iokeynoderedt{{type}}s{{sensorId}}c{{channelClean}}",
       "token": "{{jwt}}"
     }
   }

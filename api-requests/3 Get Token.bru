@@ -1,7 +1,7 @@
 meta {
   name: 3 Get Token
   type: http
-  seq: 5
+  seq: 8
 }
 
 post {
@@ -12,8 +12,8 @@ post {
 
 body:json {
   {
-    "subscriber": "{{subscription}}",
-    "subscription": "{{subscription}}",
+    "subscriber": "iokeynoderedt{{type}}s{{sensorId}}c{{channelClean}}",
+    "subscription": "iokeynoderedt{{type}}s{{sensorId}}c{{channelClean}}",
     "expiresInMinutes": 5
   }
 }

@@ -1,7 +1,7 @@
 meta {
   name: 2 Create Subscription
   type: http
-  seq: 4
+  seq: 7
 }
 
 post {
@@ -16,12 +16,12 @@ body:json {
       "id": "{{sensorId}}"
     },
     "context": "mo",
-    "subscription": "{{subscription}}",
+    "subscription": "iokeynoderedt{{type}}s{{sensorId}}c{{channelClean}}",
     "subscriptionFilter": {
       "apis": [
-        "measurements"
+        "{{type}}"
       ],
-      "typeFilter": "LDH292-1"
+      "typeFilter": "{{channel}}"
     }
   }
 }

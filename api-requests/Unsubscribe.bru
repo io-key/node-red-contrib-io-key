@@ -1,0 +1,19 @@
+meta {
+  name: Unsubscribe
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://{{tenant}}/notification2/unsubscribe?token={{jwt}}
+  body: json
+  auth: inherit
+}
+
+params:query {
+  token: {{jwt}}
+}
+
+script:post-response {
+  bru.setEnvVar("jwt",res.body.token)
+}

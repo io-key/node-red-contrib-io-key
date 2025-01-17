@@ -1,0 +1,15 @@
+meta {
+  name: Delete connection info
+  type: http
+  seq: 5
+}
+
+put {
+  url: https://{{tenant}}/inventory/managedObjects/{{sensorId}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  { "io-key-node-red_{{type}}_{{sensorId}}_{{channel}}": null }
+}
